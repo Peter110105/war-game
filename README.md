@@ -57,3 +57,62 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## 目錄結構
+src/app/
+├─ core/                    // 核心基礎設施(整個 app 共用)
+│  ├─ service/
+│  │  └─ base-game.service.ts
+│  ├─ guards/
+│  └─ interceptors/
+│
+├─ shared/                  // 共用元件/工具
+│  ├─ component/
+│  ├─ pipe/
+│  └─ util/
+│     └─ helper.ts
+│
+├─ feature/                // ⭐ 主要功能模組
+│  └─ game/
+│     ├─ model/           // 遊戲資料模型
+│     │  ├─ unit.model.ts
+│     │  ├─ tile.model.ts
+│     │  └─ game-state.model.ts
+│     │
+│     ├─ command/         // Command Pattern
+│     │  ├─ command.interface.ts
+│     │  ├─ move-command.ts
+│     │  └─ attack-command.ts
+│     │
+│     ├─ processor/       // 遊戲邏輯處理器
+│     │  ├─ combat-processor.ts
+│     │  └─ movement-processor.ts
+│     │
+│     ├─ ai/               // AI 相關
+│     │  ├─ ai-controller.ts
+│     │  └─ pathfinding.ts
+│     │
+│     ├─ service/         // 遊戲服務
+│     │  ├─ game-state.service.ts
+│     │  └─ save-manager.service.ts
+│     │
+│     ├─ phaser/           // Phaser 渲染層
+│     │  ├─ scene/
+│     │  │  ├─ battlefield.scene.ts
+│     │  │  └─ ui-overlay.scene.ts
+│     │  ├─ entity/
+│     │  │  ├─ unit-sprite.ts
+│     │  │  └─ tile-sprite.ts
+│     │  ├─ manager/
+│     │  │  ├─ input-manager.ts
+│     │  │  └─ animation-manager.ts
+│     │  └─ phaser-config.ts
+│     │
+│     └─ config/
+│        └─ game-config.ts
+│
+└─ pages/                   // 路由頁面(薄層)
+   └─ battlefield/
+      ├─ battlefield.component.ts
+      ├─ battlefield.component.html
+      └─ battlefield.component.scss
