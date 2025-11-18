@@ -17,6 +17,10 @@ export interface Unit{
     range: number;
 
     alive: boolean;
-    status?: 'idle' | 'moved' | 'acted'; // 該回合狀態
-
+    // 行動狀態
+    actionState: {
+        hasMoved: boolean;
+        hasAttacked: boolean;
+        canAct: boolean; // 綜合判斷
+    };
 }

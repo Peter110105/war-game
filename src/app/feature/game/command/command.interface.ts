@@ -1,15 +1,15 @@
 export type CommandType = 'MOVE' | 'END_TURN';
 
 export interface BaseCommand {
-  // id: string;
+  id: string;
   type: CommandType;
   playerId: string;
-  // timestamp: number;
+  timestamp?: number;
 }
 
 export interface MoveCommand extends BaseCommand {
   type: 'MOVE';
-  unitId?: string;
+  unitId: string;
   to: { x: number; y: number };
 }
 

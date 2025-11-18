@@ -4,9 +4,13 @@ import { GameCommand, MoveCommand } from '../command/command.interface';
 
 export class MovementProcessor {
   
-  execute(state: GameState, cmd: GameCommand){
+  private dist(unit: {x: number, y: number}, target: {x: number, y: number}): number {
+    return Math.abs(unit.x - target.x) + Math.abs(unit.y - target.y);
+  }
+
+  execute(state: GameState, cmd: GameCommand): { success: boolean; message?: string } {
     // 1.判斷處理器是否正確
-    if(cmd.type != 'MOVE')return {success: false, message: 'wrong processor'};
+    if(cmd.type != 'MOVE')return {success: false, message: 'MovementProcessor: not MOVE command'};
     const moveCmd = cmd as MoveCommand;
     
     // 2.判斷是否有選單位
@@ -24,11 +28,11 @@ export class MovementProcessor {
       return { success: false, message: 'target out of bounds' };
     }
     // 5.距離檢查
-    const distance = Math.abs(unit.x - x) + Math.abs(unit.y - y);
+    const distance =this.dist({x: unit.x, y: unit.y}, {x, y});
     if(distance > unit.move) return {success: false, message: 'too far'};
     
     // 6.格子是否被佔領檢查
-    const occupied = state.units.find(u => u.x === x && u.y === y && u.alive);
+    const occupied = state.units.find(unit => unit.x === x && unit.y === y && unit.alive);
     if (occupied) return { success: false, message: 'target occupied' };
 
     // 7. 移動

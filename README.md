@@ -93,12 +93,12 @@ src/app/
 │     │  └─ pathfinding.ts
 │     │
 │     ├─ service/         // 遊戲服務
-│     │  ├─ game-state.service.ts
+│     │  ├─ game-state.service.ts  // 負責管理遊戲的核心狀態和邏輯。
 │     │  └─ save-manager.service.ts
 │     │
 │     ├─ phaser/           // Phaser 渲染層
 │     │  ├─ scene/
-│     │  │  ├─ battlefield.scene.ts
+│     │  │  ├─ battlefield.scene.ts // 負責遊戲畫面的渲染和使用者輸入處理。
 │     │  │  └─ ui-overlay.scene.ts
 │     │  ├─ entity/
 │     │  │  ├─ unit-sprite.ts
@@ -106,13 +106,16 @@ src/app/
 │     │  ├─ manager/
 │     │  │  ├─ input-manager.ts
 │     │  │  └─ animation-manager.ts
-│     │  └─ phaser-config.ts
+│     │  └─ phaser-config.ts // 用於初始化和設定 Phaser 遊戲。
 │     │
 │     └─ config/
 │        └─ game-config.ts
 │
 └─ pages/                   // 路由頁面(薄層)
    └─ battlefield/
-      ├─ battlefield.component.ts
+      ├─ battlefield.component.ts // 負責將 Phaser 遊戲嵌入到 Angular 頁面中。
       ├─ battlefield.component.html
       └─ battlefield.component.scss
+
+
+

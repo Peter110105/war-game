@@ -8,7 +8,7 @@ export function createPhaserGame(container: HTMLElement): Phaser.Game{
         height: 600,
         parent: container,
         scene: [BattlefieldScene],
-        backgroundColor: '#222222',
+        backgroundColor: '#2f9710ff',
     };
     return new Phaser.Game(config);
 
