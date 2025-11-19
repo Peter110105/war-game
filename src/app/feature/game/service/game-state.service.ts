@@ -34,6 +34,10 @@ export class GameStateService {
   getUnitAt(x: number, y: number): Unit | undefined {
     return this.state.units.find(u => u.x === x && u.y === y && u.alive);
   }
+  
+  getState(): GameState {
+    return this.state;
+  }
 
   // 重置所有單位狀態 (回合開始時呼叫)
   resetUnitsActionState(playerId: string) {

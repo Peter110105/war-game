@@ -10,6 +10,7 @@ export interface BaseCommand {
 export interface MoveCommand extends BaseCommand {
   type: 'MOVE';
   unitId: string;
+  from: { x: number; y: number };
   to: { x: number; y: number };
 }
 

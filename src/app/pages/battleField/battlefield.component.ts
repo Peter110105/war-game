@@ -4,6 +4,7 @@ import { createPhaserGame } from '../../feature/game/phaser/phaser-config';
 import { Subscription } from 'rxjs';
 import { GameEventService } from '../../feature/game/service/game-event.service';
 import { BattlefieldScene } from '../../feature/game/phaser/scene/battlefield.scene';
+import { PathfindingService } from '../../feature/game/logic/path-finding.service';
 
 @Component({
     selector: 'app-battlefield',
@@ -16,7 +17,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy{
   private game?: Phaser.Game;
   private eventSubscription?: Subscription;
 
-  constructor(private gameService: GameStateService, private eventService: GameEventService) {}
+  constructor(private gameService: GameStateService, private eventService: GameEventService, private pathfindingService: PathfindingService) {}
 
   ngOnInit() {
       this.initPhaserGame();
@@ -38,7 +39,11 @@ export class BattlefieldComponent implements OnInit, OnDestroy{
           backgroundColor: '#2f9710ff',
       };
       this.game = new Phaser.Game(config);
-      this.game.scene.start('BattlefieldScene', { gameService: this.gameService, eventService: this.eventService });
+      this.game.scene.start('BattlefieldScene', { 
+        gameService: this.gameService, 
+        eventService: this.eventService, 
+        pathfindingService: this.pathfindingService 
+      });
   }
 
   private subscribeToGameEvents(){
