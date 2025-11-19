@@ -1,1 +1,28 @@
-<div #gameContainer></div>
+<div class="battlefield-container">
+  <div #gameContainer></div>
+
+  <div class="game-ui">
+    <div class="turn-info">
+      <p>回合: {{ gameState.turn  }}</p>
+      <p>玩家: {{ currentPlayer.name }}</p>
+    </div>
+
+    <div class="unit-info">
+      @if (selectedUnit) {
+        <h3>單位資訊</h3>
+        <p>名稱: {{ selectedUnit.name }}</p>
+        <p>生命值: {{ selectedUnit.hp }}/{{selectedUnit.maxHp}}</p>
+        <p>移動力: {{ selectedUnit.actionState.hasMoved ? '✓' : '-' }}</p>
+        <p>攻擊力: {{ selectedUnit.actionState.hasAttacked ? '✓' : '-' }}</p>
+      }
+    <div>
+
+    <button
+      (click)="endTurn()"
+      [disabled]="!isCurrentPlayer()"
+      class="end-turn-btn"
+    >
+      結束回合
+    </button>
+  </div>
+</div>
