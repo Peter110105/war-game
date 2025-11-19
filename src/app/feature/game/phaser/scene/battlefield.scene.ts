@@ -100,7 +100,7 @@ export class BattlefieldScene extends Phaser.Scene {
     }
   }
 
-  // 只更新單個單位 (v0.1.0 移動動畫會用到)
+  // 只更新單個單位
   private updateUnitPosition(unitId: string, x: number, y: number) {
     const sprite = this.unitSprites.get(unitId);
     if (!sprite) return;
@@ -141,28 +141,39 @@ export class BattlefieldScene extends Phaser.Scene {
 
   private handleClick(x: number, y: number) {
     // 通知 Angular 層
-    this.eventService.emit({
-      type: 'UNIT_CLICKED',
-      data: { x, y },
-    });
-    const unit = this.gameService.getUnitAt(x, y);
+    // this.eventService.emit({
+    //   type: 'UNIT_CLICKED',
+    //   data: { x, y },
+    // });
+    const currentPlayerId = this.gameService.currentPlayerId;
+    const clickedUnit = this.gameService.getUnitAt(x, y);
 
     // 選取我方單位
-    if (unit && unit.ownerId === this.gameService.currentPlayerId) {
-      this.selectedUnitId = unit.id;
-      this.showMovableArea(unit.id);
-      console.log(`選擇單位: ${unit.name}`);
+    if ( clickedUnit && clickedUnit.ownerId === this.gameService.currentPlayerId) {
+      // 如果該單位本回合已移動過，則不允許選取
+      if(clickedUnit.actionState.hasMoved){
+        console.log('該單位本回合已移動過');
+        return;
+      }
+      // 選取單位
+      this.selectedUnitId = clickedUnit.id;
+      this.showMovableArea(clickedUnit.id);
+      this.eventService.emit({
+        type: 'UNIT_SELECTED',
+        data: { x, y },
+      });
+      console.log(`選擇單位: ${clickedUnit.name}`);
       return;
     }
 
     // 執行移動
     if (this.selectedUnitId) {
-      const unit = this.gameService.getUnits().find((u) => u.id === this.selectedUnitId)!;
+      const selectedUnit = this.gameService.getUnits().find((u) => u.id === this.selectedUnitId)!;
       const path = this.pathfindingService.findPath(
-        this.gameService.getState(),
-        { x: unit.x, y: unit.y },
+        this.gameService.getGameState(),
+        { x: selectedUnit.x, y: selectedUnit.y },
         { x, y },
-        unit.move
+        selectedUnit.move
       );
 
       if (!path || path.length === 0) {
@@ -175,7 +186,7 @@ export class BattlefieldScene extends Phaser.Scene {
         type: 'MOVE',
         playerId: this.gameService.currentPlayerId,
         unitId: this.selectedUnitId,
-        from: { x: unit.x, y: unit.y },
+        from: { x: selectedUnit.x, y: selectedUnit.y },
         to: { x, y },
         timestamp: Date.now(),
       };
@@ -199,7 +210,7 @@ export class BattlefieldScene extends Phaser.Scene {
 
     // 取的可移動範圍
     const movableArea = this.pathfindingService.getMovableArea(
-      this.gameService.getState(),
+      this.gameService.getGameState(),
       unitId
     );
 
