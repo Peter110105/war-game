@@ -16,6 +16,7 @@ export interface MoveCommand extends BaseCommand {
 
 export interface EndTurnCommand extends BaseCommand {
   type: 'END_TURN';
+  playerId: string;
 }
 
 export type GameCommand = MoveCommand | EndTurnCommand;
