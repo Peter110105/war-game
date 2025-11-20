@@ -1,7 +1,10 @@
-// command-processor.ts
-import { GameState} from '../model/game-state.model';
+import { Injectable } from '@angular/core';
+import { GameState } from '../model/game-state.model';
 import { GameCommand, MoveCommand } from '../command/command.interface';
 
+@Injectable({
+  providedIn: 'root',
+})
 export class MovementProcessor {
 
   private dist(unit: {x: number, y: number}, target: {x: number, y: number}): number {
@@ -14,7 +17,7 @@ export class MovementProcessor {
     const moveCmd = cmd as MoveCommand;
 
     // 2.判斷是否有選單位
-    if(!moveCmd.unitId) return {success: false, message: 'no unitId'};
+    if (!moveCmd.unitId) return { success: false, message: 'no unitId' };
 
     // 3.單位檢查
     const unit = state.units.find(u => u.id === moveCmd.unitId);

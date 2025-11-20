@@ -4,14 +4,13 @@ import { GameCommand } from '../command/command.interface';
 import { MovementProcessor } from '../processor/movement-processor';
 import { Unit } from '../model/unit.model';
 import { Player } from '../model/player.model';
-import { GameEventService } from './game-event.service';
+import { GameEventService, GameEventType } from './game-event.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateService {
   private state: GameState;
-  private movement = new MovementProcessor();
 
-  constructor(private eventService: GameEventService) {
+  constructor(private eventService: GameEventService, private movementProcessor: MovementProcessor) {
     this.state = {
       width: 10,
       height: 10,
@@ -90,6 +89,14 @@ export class GameStateService {
     return this.state.units.find((u) => u.x === x && u.y === y && u.alive);
   }
   /**
+   * 透過ID取得單位
+   * @param unitId 單位ID
+   * @returns 單位 或 undefined
+   */
+  public getUnitById(unitId: string): Unit | undefined {
+    return this.state.units.find((u) => u.id === unitId);
+  }
+  /**
    * 取得遊戲狀態
    */
   public getGameState(): GameState {
@@ -115,11 +122,11 @@ export class GameStateService {
       this.state.turn++;
     }
     // 3. 重置單位狀態
-    this.resetTurnActions(this.getCurrentPlayer().id);
+    this.resetPlayerActions(this.getCurrentPlayer().id);
 
     // 4. 發出回合結束事件
     this.eventService.emit({
-      type: 'TURN_ENDED',
+      type: GameEventType.TURN_ENDED,
       data: {
         turn: this.state.turn,
         currentPlayerId: this.getCurrentPlayer().id,
@@ -129,7 +136,7 @@ export class GameStateService {
 
   public execute(cmd: GameCommand) {
     if (cmd.type === 'MOVE') {
-      return this.movement.execute(this.state, cmd);
+      return this.movementProcessor.execute(this.state, cmd);
     }
 
     if (cmd.type === 'END_TURN') {
@@ -145,21 +152,11 @@ export class GameStateService {
     return { success: false, message: 'unknown command' };
   }
 
-  // 重置所有單位狀態 (回合開始時呼叫)
-  private resetUnitsActionState(playerId: string) {
-    this.state.units
-      .filter((u) => u.ownerId === playerId && u.alive)
-      .forEach((u) => {
-        u.actionState = {
-          hasMoved: false,
-          hasAttacked: false,
-          canAct: true,
-        };
-      });
-  }
-
-  // 重置回合內單位狀態
-  private resetTurnActions(playerId: string) {
+  /**
+   * 重置該玩家所有單位的行動狀態
+   * @param playerId 玩家ID
+   */
+  public resetPlayerActions(playerId: string) {
     this.state.units
       .filter((u) => u.ownerId === playerId && u.alive)
       .forEach((u) => {
@@ -172,7 +169,7 @@ export class GameStateService {
   }
 
   // 標記單位為已移動
-  private setUnitMoved(unitId: string) {
+  public setUnitMoved(unitId: string) {
     const unit = this.state.units.find((u) => u.id === unitId);
     if (unit) {
       unit.actionState.hasMoved = true;
@@ -183,7 +180,7 @@ export class GameStateService {
    * @param unitId 單位ID
    * @returns 單位是否可行動
    */
-  private canUnitAct(unitId: string): boolean {
+  public canUnitAct(unitId: string): boolean {
     const unit = this.state.units.find((u) => u.id === unitId);
     return unit?.actionState.canAct ?? false;
   }
@@ -191,7 +188,7 @@ export class GameStateService {
    * @param unitId 單位ID
    * @returns 單位是否可移動
    */
-  private canUnitMove(unitId: string): boolean {
+  public canUnitMove(unitId: string): boolean {
     const unit = this.state.units.find((u) => u.id === unitId);
     if (!unit) return false;
 

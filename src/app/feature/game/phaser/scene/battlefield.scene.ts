@@ -1,17 +1,17 @@
 import Phaser from "phaser";
 import { GameCommand } from "../../command/command.interface";
 import { GameStateService } from "../../service/game-state.service";
-import { GameEventService } from "../../service/game-event.service";
+import { GameEventService, GameEventType } from "../../service/game-event.service";
 import { PathfindingService } from "../../logic/path-finding.service";
 import { GAME_CONFIG } from "../../config/game.config";
 
 export class BattlefieldScene extends Phaser.Scene {
+  private tileSize = GAME_CONFIG.TILE_SIZE;
   private unitSprites: Map<string, Phaser.GameObjects.Rectangle> = new Map();
   private selectedUnitId: string | null = null;
   private gameService!: GameStateService;
   private eventService!: GameEventService;
   private pathfindingService!: PathfindingService;
-  private selectedUnitId: string | null = null;
   private movableAreaGraphics?: Phaser.GameObjects.Graphics; // 可移動範圍圖形
   private unitTooltip?: Phaser.GameObjects.Text; // 單位提示文字
 
@@ -123,7 +123,7 @@ export class BattlefieldScene extends Phaser.Scene {
     });
   }
 
-  private moveUnitAlongPath(unitId: string, path:{x: number, y: number}[]) {
+  private moveUnitAlongPath(unitId: string, path: { x: number; y: number }[]) {
     if (!path) return;
 
     this.input.enabled = false; // 禁用輸入
@@ -146,7 +146,7 @@ export class BattlefieldScene extends Phaser.Scene {
     const clickedUnit = this.gameService.getUnitAt(x, y);
 
     // 選取我方單位
-    if ( clickedUnit && clickedUnit.ownerId === this.gameService.currentPlayerId) {
+    if (clickedUnit && clickedUnit.ownerId === currentPlayerId) {
       // 如果該單位本回合已移動過，則不允許選取
       if (clickedUnit.actionState.hasMoved) {
         console.log('該單位本回合已移動過');
@@ -156,7 +156,7 @@ export class BattlefieldScene extends Phaser.Scene {
       this.selectedUnitId = clickedUnit.id;
       this.showMovableArea(clickedUnit.id);
       this.eventService.emit({
-        type: 'UNIT_SELECTED',
+        type: GameEventType.UNIT_SELECTED,
         data: { x, y },
       });
       console.log(`選擇單位: ${clickedUnit.name}`);
@@ -165,7 +165,7 @@ export class BattlefieldScene extends Phaser.Scene {
 
     // 執行移動
     if (this.selectedUnitId) {
-      const selectedUnit = this.gameService.getUnits().find((u) => u.id === this.selectedUnitId)!;
+      const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
       const path = this.pathfindingService.findPath(
         this.gameService.getGameState(),
         { x: selectedUnit.x, y: selectedUnit.y },
@@ -181,7 +181,7 @@ export class BattlefieldScene extends Phaser.Scene {
       const cmd: GameCommand = {
         id: 'cmd_' + Date.now(),
         type: 'MOVE',
-        playerId: this.gameService.currentPlayerId,
+        playerId: currentPlayerId,
         unitId: this.selectedUnitId,
         from: { x: selectedUnit.x, y: selectedUnit.y },
         to: { x, y },

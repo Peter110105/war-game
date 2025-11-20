@@ -17,3 +17,9 @@ export interface GameEvent{
   type:'UNIT_SELECTED' | 'UNIT_MOVED' | 'TURN_ENDED';
   data: any;
 }
+
+export enum GameEventType {
+  UNIT_SELECTED = 'UNIT_SELECTED',
+  UNIT_MOVED = 'UNIT_MOVED',
+  TURN_ENDED = 'TURN_ENDED',
+}

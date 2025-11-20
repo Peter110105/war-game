@@ -2,11 +2,9 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { GameStateService } from '../../feature/game/service/game-state.service'
 import { PHASER_CONFIG } from '../../feature/game/phaser/phaser-config';
 import { Subscription } from 'rxjs';
-import { GameEventService } from '../../feature/game/service/game-event.service';
-import { BattlefieldScene } from '../../feature/game/phaser/scene/battlefield.scene';
+import { GameEventService, GameEventType } from '../../feature/game/service/game-event.service';
 import { PathfindingService } from '../../feature/game/logic/path-finding.service';
 import { Unit } from '../../feature/game/model/unit.model';
-import { Game } from 'phaser';
 import { GameCommand } from '../../feature/game/command/command.interface';
 
 @Component({
@@ -77,15 +75,15 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
   private subscribeToGameEvents() {
     this.eventSubscription = this.eventService.events$.subscribe((event) => {
       switch (event.type) {
-        case 'UNIT_SELECTED':
+        case GameEventType.UNIT_SELECTED:
           this.selectedUnit =
             this.gameService.getUnitAt(event.data.x, event.data.y) || null;
           console.log('Unit selected:', this.selectedUnit?.name);
           break;
-        case 'UNIT_MOVED':
+        case GameEventType.UNIT_MOVED:
           console.log('Unit moved:', event.data);
           break;
-        case 'TURN_ENDED':
+        case GameEventType.TURN_ENDED:
           console.log('Turn ended:', event.data);
           break;
       }
