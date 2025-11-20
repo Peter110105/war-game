@@ -3,10 +3,11 @@ import { GameCommand } from "../../command/command.interface";
 import { GameStateService } from "../../service/game-state.service";
 import { GameEventService } from "../../service/game-event.service";
 import { PathfindingService } from "../../logic/path-finding.service";
+import { GAME_CONFIG } from "../../config/game.config";
 
 export class BattlefieldScene extends Phaser.Scene {
   private unitSprites: Map<string, Phaser.GameObjects.Rectangle> = new Map();
-  private tileSize = 64;
+  private selectedUnitId: string | null = null;
   private gameService!: GameStateService;
   private eventService!: GameEventService;
   private pathfindingService!: PathfindingService;
@@ -46,13 +47,13 @@ export class BattlefieldScene extends Phaser.Scene {
 
   private drawMap() {
     const g = this.add.graphics();
-    g.lineStyle(1, 0x444444);
+    g.lineStyle(1, GAME_CONFIG.LINE_STYLE.COLOR);
 
-    for (let i = 0; i <= 800; i += this.tileSize) {
-      g.lineBetween(i, 0, i, 600);
+    for (let i = 0; i <= GAME_CONFIG.CANVAS_WIDTH; i += this.tileSize) {
+      g.lineBetween(i, 0, i, GAME_CONFIG.CANVAS_HEIGHT);
     }
-    for (let j = 0; j <= 600; j += this.tileSize) {
-      g.lineBetween(0, j, 800, j);
+    for (let j = 0; j <= GAME_CONFIG.CANVAS_HEIGHT; j += this.tileSize) {
+      g.lineBetween(0, j, GAME_CONFIG.CANVAS_WIDTH, j);
     }
   }
 
@@ -64,7 +65,7 @@ export class BattlefieldScene extends Phaser.Scene {
     // 重新繪製
     const units = this.gameService.getUnits();
     units.forEach((unit) => {
-      const color = unit.ownerId === 'p1' ? 0xff0000 : 0x00ff00;
+      const color = unit.ownerId === 'p1' ? GAME_CONFIG.COLOR.P1 : GAME_CONFIG.COLOR.P2;
 
       const rect = this.add.rectangle(
         unit.x * this.tileSize + this.tileSize / 2,
@@ -82,9 +83,10 @@ export class BattlefieldScene extends Phaser.Scene {
     if (unit) {
       if (!this.unitTooltip) {
         this.unitTooltip = this.add.text(0, 0, '', {
-          font: '16px Arial',
-          color: '#ffffff',
-          backgroundColor: '#000000',
+          font: GAME_CONFIG.TEXT.FONT_FAMILY,
+          fontSize: GAME_CONFIG.TEXT.FONT_SIZE,
+          color: GAME_CONFIG.TEXT.COLOR,
+          backgroundColor: GAME_CONFIG.TEXT.BACKGROUND,
         });
       }
       this.unitTooltip.setText(
@@ -107,14 +109,14 @@ export class BattlefieldScene extends Phaser.Scene {
     // 用 Tween 做平滑移動動畫
     this.tweens.add({
       targets: sprite,
-      duration: 300, // 毫秒
+      duration: GAME_CONFIG.ANIMATION.MOVE_DURATION, // 毫秒
       x: x * this.tileSize + this.tileSize / 2,
       y: y * this.tileSize + this.tileSize / 2,
       ease: 'Power2', // 緩動效果()
       onComplete: () => {
         // 動畫完成後的回調
         this.eventService.emit({
-          type: 'UNIT_MOVED',
+          type: GameEventType.UNIT_MOVED,
           data: { unitId, x, y },
         });
       },
@@ -127,31 +129,26 @@ export class BattlefieldScene extends Phaser.Scene {
     this.input.enabled = false; // 禁用輸入
 
     path.forEach((pos, index) => {
-      this.time.delayedCall(index * 300, () => {
+      this.time.delayedCall(index * GAME_CONFIG.ANIMATION.MOVE_DURATION, () => {
         this.updateUnitPosition(unitId, pos.x, pos.y);
       });
     });
 
     // 等所有動畫完成後才啟用
-    const totalDuration = path.length * 300;
+    const totalDuration = path.length * GAME_CONFIG.ANIMATION.MOVE_DURATION;
     this.time.delayedCall(totalDuration, () => {
       this.input.enabled = true;
     });
   }
 
   private handleClick(x: number, y: number) {
-    // 通知 Angular 層
-    // this.eventService.emit({
-    //   type: 'UNIT_CLICKED',
-    //   data: { x, y },
-    // });
     const currentPlayerId = this.gameService.currentPlayerId;
     const clickedUnit = this.gameService.getUnitAt(x, y);
 
     // 選取我方單位
     if ( clickedUnit && clickedUnit.ownerId === this.gameService.currentPlayerId) {
       // 如果該單位本回合已移動過，則不允許選取
-      if(clickedUnit.actionState.hasMoved){
+      if (clickedUnit.actionState.hasMoved) {
         console.log('該單位本回合已移動過');
         return;
       }
@@ -216,7 +213,7 @@ export class BattlefieldScene extends Phaser.Scene {
 
     // 繪製可移動範圍
     this.movableAreaGraphics = this.add.graphics();
-    this.movableAreaGraphics.fillStyle(0x00aaff, 0.3);
+    this.movableAreaGraphics.fillStyle(GAME_CONFIG.COLOR.MOVABLE_AREA, GAME_CONFIG.COLOR.MOVABLE_AREA_ALPHA);
     movableArea.forEach((pos) => {
       this.movableAreaGraphics!.fillRect(
         pos.x * this.tileSize,

@@ -12,8 +12,8 @@
         <h3>單位資訊</h3>
         <p>名稱: {{ selectedUnit.name }}</p>
         <p>生命值: {{ selectedUnit.hp }}/{{selectedUnit.maxHp}}</p>
-        <p>移動力: {{ selectedUnit.actionState.hasMoved ? '✓' : '-' }}</p>
-        <p>攻擊力: {{ selectedUnit.actionState.hasAttacked ? '✓' : '-' }}</p>
+        <p>是否已移動: {{ selectedUnit.actionState.hasMoved ? '✓' : '-' }}</p>
+        <p>是否已攻擊: {{ selectedUnit.actionState.hasAttacked ? '✓' : '-' }}</p>
       }
     <div>
 

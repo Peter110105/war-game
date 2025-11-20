@@ -1,15 +1,11 @@
 import Phaser from "phaser";
 import { BattlefieldScene } from './scene/battlefield.scene';
+import { GAME_CONFIG } from '../config/game.config';
 
-export function createPhaserGame(container: HTMLElement): Phaser.Game{
-    const config: Phaser.Types.Core.GameConfig = {
-        type: Phaser.AUTO,
-        width: 800,
-        height: 600,
-        parent: container,
-        scene: [BattlefieldScene],
-        backgroundColor: '#2f9710ff',
-    };
-    return new Phaser.Game(config);
-
-}
+export const PHASER_CONFIG = {
+  type: Phaser.AUTO,
+  width: GAME_CONFIG.CANVAS_WIDTH,
+  height: GAME_CONFIG.CANVAS_HEIGHT,
+  scene: [BattlefieldScene],
+  backgroundColor: GAME_CONFIG.BACKGROUND,
+};

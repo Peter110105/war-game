@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GameStateService } from '../../feature/game/service/game-state.service'
-import { createPhaserGame } from '../../feature/game/phaser/phaser-config';
+import { PHASER_CONFIG } from '../../feature/game/phaser/phaser-config';
 import { Subscription } from 'rxjs';
 import { GameEventService } from '../../feature/game/service/game-event.service';
 import { BattlefieldScene } from '../../feature/game/phaser/scene/battlefield.scene';
@@ -62,14 +62,10 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
   }
 
   private initPhaserGame() {
-    const config: Phaser.Types.Core.GameConfig = {
-      type: Phaser.AUTO,
-      width: 800,
-      height: 600,
+    const config: Phaser.Types.Core.GameConfig ={
+      ...PHASER_CONFIG,
       parent: this.gameContainer.nativeElement,
-      scene: [BattlefieldScene],
-      backgroundColor: '#2f9710ff',
-    };
+    }
     this.game = new Phaser.Game(config);
     this.game.scene.start('BattlefieldScene', {
       gameService: this.gameService,

@@ -13,8 +13,8 @@ export class GameStateService {
 
   constructor(private eventService: GameEventService) {
     this.state = {
-      width: 8,
-      height: 6,
+      width: 10,
+      height: 10,
       tiles: [],
       units: [
         {
