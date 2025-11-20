@@ -1,73 +1,28 @@
 import { Injectable } from '@angular/core';
+import { GameStateLoaderService } from '../../../core/service/game-state-loader.service';
+import { GameEventService, GameEventType } from './game-event.service';
 import { GameState } from '../model/game-state.model'
 import { GameCommand } from '../command/command.interface';
 import { MovementProcessor } from '../processor/movement-processor';
+import { CombatProcessor } from '../processor/combat-processor';
 import { Unit } from '../model/unit.model';
 import { Player } from '../model/player.model';
-import { GameEventService, GameEventType } from './game-event.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateService {
-  private state: GameState;
+  private state!: GameState;
 
-  constructor(private eventService: GameEventService, private movementProcessor: MovementProcessor) {
-    this.state = {
-      width: 10,
-      height: 10,
-      tiles: [],
-      units: [
-        {
-          id: 'u1',
-          name: '劍士',
-          type: 'soldier',
-          ownerId: 'p1',
-          x: 1,
-          y: 1,
-          hp: 10,
-          maxHp: 10,
-          attack: 3,
-          defense: 2,
-          move: 3,
-          range: 1,
-          alive: true,
-          actionState: { hasMoved: false, hasAttacked: false, canAct: true },
-        },
-        {
-          id: 'u2',
-          name: '弓兵',
-          type: 'archer',
-          ownerId: 'p2',
-          x: 6,
-          y: 4,
-          hp: 8,
-          maxHp: 8,
-          attack: 2,
-          defense: 1,
-          move: 2,
-          range: 2,
-          alive: true,
-          actionState: { hasMoved: false, hasAttacked: false, canAct: true },
-        },
-      ],
-      currentPlayerIndex: 0,
-      players: [
-        {
-          id: 'p1',
-          name: 'Player 1',
-          team: 'P1',
-          aiControlled: false,
-          isActive: true,
-        },
-        {
-          id: 'p2',
-          name: 'Player 2',
-          team: 'P2',
-          aiControlled: false,
-          isActive: false,
-        },
-      ],
-      turn: 1,
-    };
+  constructor(
+    private eventService: GameEventService,
+    private movementProcessor: MovementProcessor,
+    private combatProcessor: CombatProcessor,
+    private gameStateLoaderService: GameStateLoaderService
+  ) {
+    this.state = this.createDefaultState(); // 先給預設值
+    // 非同步加載資料
+    this.gameStateLoaderService.loadInitialState().subscribe((state) => {
+      this.state = state;
+    });
   }
 
   get turn(): number {
@@ -138,6 +93,9 @@ export class GameStateService {
     if (cmd.type === 'MOVE') {
       return this.movementProcessor.execute(this.state, cmd);
     }
+    if (cmd.type === 'ATTACK') {
+      return this.combatProcessor.execute(this.state, cmd);
+    }
 
     if (cmd.type === 'END_TURN') {
       // 1. 檢查是否輪到該玩家
@@ -193,5 +151,16 @@ export class GameStateService {
     if (!unit) return false;
 
     return unit.actionState.canAct && !unit.actionState.hasMoved;
+  }
+  private createDefaultState(): GameState {
+    return {
+      width: 8,
+      height: 6,
+      tiles: [],
+      units: [],
+      players: [],
+      currentPlayerIndex: 0,
+      turn: 1,
+    };
   }
 }

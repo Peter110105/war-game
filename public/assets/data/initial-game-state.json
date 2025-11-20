@@ -1,0 +1,117 @@
+{
+  "width": 10,
+  "height": 10,
+  "tiles": [
+    {
+      "x": 0,
+      "y": 0,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 2,
+      "y": 0,
+      "terrain": { "terrainType": "高山", "moveCost": 3, "defenseBonus": 2 }
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "terrain": { "terrainType": "水", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 4,
+      "y": 0,
+      "terrain": { "terrainType": "城堡", "moveCost": 1, "defenseBonus": 3 }
+    }
+  ],
+  "players": [
+    {
+      "id": "P1",
+      "name": "玩家一",
+      "team": "P1",
+      "aiControlled": false,
+      "isActive": true
+    },
+    {
+      "id": "P2",
+      "name": "玩家二",
+      "team": "P2",
+      "aiControlled": true,
+      "isActive": false
+    }
+  ],
+  "units": [
+    {
+      "id": "U1",
+      "name": "劍士A",
+      "type": "soldier",
+      "ownerId": "P1",
+      "x": 1,
+      "y": 1,
+
+      "maxHp": 100,
+      "hp": 100,
+      "attack": 20,
+      "defense": 10,
+      "move": 4,
+      "range": 1,
+
+      "alive": true,
+      "actionState": {
+        "hasMoved": false,
+        "hasAttacked": false,
+        "canAct": true
+      }
+    },
+    {
+      "id": "U2",
+      "name": "弓兵A",
+      "type": "archer",
+      "ownerId": "P1",
+      "x": 2,
+      "y": 1,
+
+      "maxHp": 80,
+      "hp": 80,
+      "attack": 18,
+      "defense": 6,
+      "move": 3,
+      "range": 2,
+
+      "alive": true,
+      "actionState": {
+        "hasMoved": false,
+        "hasAttacked": false,
+        "canAct": true
+      }
+    },
+    {
+      "id": "E1",
+      "name": "敵方步兵",
+      "type": "soldier",
+      "ownerId": "P2",
+      "x": 8,
+      "y": 5,
+
+      "maxHp": 100,
+      "hp": 100,
+      "attack": 18,
+      "defense": 8,
+      "move": 4,
+      "range": 1,
+
+      "alive": true,
+      "actionState": {
+        "hasMoved": false,
+        "hasAttacked": false,
+        "canAct": true
+      }
+    }
+  ],
+  "currentPlayerIndex": 0,
+  "turn": 1
+}
