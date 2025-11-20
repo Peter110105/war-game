@@ -16,6 +16,8 @@ interface GameConfig {
     NEUTRAL: number; // 中立單位顏色
     MOVABLE_AREA: number; // 可移動範圍顏色
     MOVABLE_AREA_ALPHA: number; // 可移動範圍透明度
+    ATTACKABLE_AREA: number; // 可攻擊範圍顏色
+    ATTACKABLE_AREA_ALPHA: number; // 可攻擊範圍透明度
   };
   // 文字配置
   TEXT: {
@@ -48,6 +50,8 @@ export const GAME_CONFIG: GameConfig = {
     NEUTRAL: 0xffff00,
     MOVABLE_AREA: 0x00aaff,
     MOVABLE_AREA_ALPHA: 0.3,
+    ATTACKABLE_AREA: 0xffaa00,
+    ATTACKABLE_AREA_ALPHA: 0.3,
   },
   TEXT: {
     FONT_FAMILY: 'Arial',
