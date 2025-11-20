@@ -152,4 +152,51 @@ export class PathfindingService {
     // 不包含起點，包含終點
     return path;
   }
+  // 計算可攻擊範圍
+  public getAttackableArea(state: GameState, unitId: string): { x: number; y: number }[] {
+    const unit = state.units.find((u) => u.id === unitId);
+    if (!unit) return [];
+
+     const visited = new Set<string>();
+     const queue: { x: number; y: number; range: number }[] = [];
+     const result: { x: number; y: number }[] = [];
+
+     queue.push({ x: unit.x, y: unit.y, range: 0 });
+     visited.add(`${unit.x},${unit.y}`);
+
+     while (queue.length > 0) {
+       const current = queue.shift()!;
+
+       if (current.range > 0) {
+         // 不包含起點
+         result.push({ x: current.x, y: current.y });
+       }
+       // 判斷是否超出攻擊範圍
+       if(current.range == unit.range) continue;
+
+       // 四個方向
+       const directions = [
+         [0, 1],
+         [0, -1],
+         [1, 0],
+         [-1, 0],
+       ];
+
+       for (const [dx, dy] of directions) {
+         const nx = current.x + dx;
+         const ny = current.y + dy;
+         const key = `${nx},${ny}`;
+
+         if (visited.has(key)) continue;
+         if (nx < 0 || ny < 0 || nx >= state.width || ny >= state.height) continue;
+
+
+        visited.add(key);
+        queue.push({ x: nx, y: ny, range: current.range + 1 });
+
+       }
+     }
+
+    return result
+  }
 }

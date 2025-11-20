@@ -13,6 +13,7 @@ export class BattlefieldScene extends Phaser.Scene {
   private eventService!: GameEventService;
   private pathfindingService!: PathfindingService;
   private movableAreaGraphics?: Phaser.GameObjects.Graphics; // 可移動範圍圖形
+  private attackableAreaGraphics?: Phaser.GameObjects.Graphics; // 可攻擊範圍圖形
   private unitTooltip?: Phaser.GameObjects.Text; // 單位提示文字
 
   constructor() {
@@ -155,6 +156,7 @@ export class BattlefieldScene extends Phaser.Scene {
       // 選取單位
       this.selectedUnitId = clickedUnit.id;
       this.showMovableArea(clickedUnit.id);
+      this.showAttackableArea(clickedUnit.id);
       this.eventService.emit({
         type: GameEventType.UNIT_SELECTED,
         data: { x, y },
@@ -191,6 +193,7 @@ export class BattlefieldScene extends Phaser.Scene {
       const result = this.gameService.execute(cmd);
       if (result.success) {
         this.clearMovableArea(); // 清除可移動範圍顯示
+        this.clearAttackableArea(); // 清除可攻擊範圍顯示
         this.moveUnitAlongPath(this.selectedUnitId, path);
         // this.updateUnitPosition(this.selectedUnitId, x, y);
         this.selectedUnitId = null;
@@ -228,5 +231,32 @@ export class BattlefieldScene extends Phaser.Scene {
     this.movableAreaGraphics?.clear();
     this.movableAreaGraphics?.destroy();
     this.movableAreaGraphics = undefined;
+  }
+  // 顯示可攻擊範圍
+  private showAttackableArea(unitId: string) {
+    // 清除舊有的可攻擊範圍
+    this.clearAttackableArea();
+    // 取的可攻擊範圍
+    const attackableArea = this.pathfindingService.getAttackableArea(
+      this.gameService.getGameState(),
+      unitId
+    );
+    // 繪製可攻擊範圍
+    this.attackableAreaGraphics = this.add.graphics();
+    this.attackableAreaGraphics.fillStyle(GAME_CONFIG.COLOR.ATTACKABLE_AREA, GAME_CONFIG.COLOR.ATTACKABLE_AREA_ALPHA);
+    attackableArea.forEach((pos) => {
+      this.attackableAreaGraphics!.fillRect(
+        pos.x * this.tileSize,
+        pos.y * this.tileSize,
+        this.tileSize,
+        this.tileSize
+      );
+    });
+  }
+  // 清除可攻擊範圍顯示
+  private clearAttackableArea() {
+    this.attackableAreaGraphics?.clear();
+    this.attackableAreaGraphics?.destroy();
+    this.attackableAreaGraphics = undefined;
   }
 }
