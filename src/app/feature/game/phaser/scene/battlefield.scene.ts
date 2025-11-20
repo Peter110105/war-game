@@ -44,6 +44,12 @@ export class BattlefieldScene extends Phaser.Scene {
       const y = Math.floor(pointer.y / this.tileSize);
       this.showUnitTooltip(x, y);
     });
+    // 訂閱死亡事件
+    this.eventService.events$.subscribe((event) => {
+      if(event.type === GameEventType.UNIT_DIED){
+        this.playDeathAnimation(event.data.unitId);
+      }
+    });
   }
 
   private drawMap() {
@@ -66,7 +72,8 @@ export class BattlefieldScene extends Phaser.Scene {
     // 重新繪製
     const units = this.gameService.getUnits();
     units.forEach((unit) => {
-      const color = unit.ownerId === 'p1' ? GAME_CONFIG.COLOR.P1 : GAME_CONFIG.COLOR.P2;
+      const color =
+        unit.ownerId === 'P1' ? GAME_CONFIG.COLOR.P1 : GAME_CONFIG.COLOR.P2;
 
       const rect = this.add.rectangle(
         unit.x * this.tileSize + this.tileSize / 2,
@@ -141,7 +148,73 @@ export class BattlefieldScene extends Phaser.Scene {
       this.input.enabled = true;
     });
   }
+  private playAttackAnimation(unitId: string, targetId: string) {
+    const unitSprite = this.unitSprites.get(unitId);
+    const targetSprite = this.unitSprites.get(targetId);
+    if (!unitSprite || !targetSprite) return;
 
+    const distance = Phaser.Math.Distance.Between(
+      unitSprite.x,
+      unitSprite.y,
+      targetSprite.x,
+      targetSprite.y
+    );
+    // 計算衝撞點 (Attack Point) 的座標
+    const attackPoint = {
+      x: unitSprite.x + ((targetSprite.x - unitSprite.x) / distance) * 30,
+      y: unitSprite.y + ((targetSprite.y - unitSprite.y) / distance) * 30,
+    };
+
+    // 繪製攻擊動畫
+    this.tweens.add({
+      targets: unitSprite,
+      duration: GAME_CONFIG.ANIMATION.ATTACK_DURATION,
+      x: attackPoint.x,
+      y: attackPoint.y,
+      yoyo: true,
+      ease: 'Power2',
+      onComplete: () => {
+        this.playDamageAnimation(targetId); // 播放受傷動畫
+        this.eventService.emit({
+          type: GameEventType.UNIT_ATTACKED,
+          data: { unitId, targetId },
+        });
+      },
+    });
+    console.log('attack-sound');
+  }
+  private playDamageAnimation(unitId: string) {
+    const unitSprite = this.unitSprites.get(unitId);
+    if (!unitSprite) return;
+
+    this.tweens.add({
+      targets: unitSprite,
+      alpha: 0.5, // 閃爍到半透明
+      yoyo: true, // 來回播放
+      duration: 50,
+      repeat: 3, // 重複閃爍 3 次
+      ease: 'Power1',
+    });
+    console.log('damage-sound');
+  }
+  private playDeathAnimation(unitId: string){
+    const unitSprite = this.unitSprites.get(unitId);
+    if (!unitSprite) return;
+
+    console.log('playDeathAnimation');
+    console.log('dead-sound');
+    this.tweens.add({
+      targets: unitSprite,
+      alpha: 0, // 目標不透明度為 0 (完全透明)
+      duration: GAME_CONFIG.ANIMATION.DEATH_DURATION,
+      ease: 'Linear',
+      onComplete: () => {
+        unitSprite.destroy();
+        this.unitSprites.delete(unitId);
+      },
+    });
+
+  }
   private handleClick(x: number, y: number) {
     const currentPlayerId = this.gameService.currentPlayerId;
     const clickedUnit = this.gameService.getUnitAt(x, y);
@@ -165,36 +238,60 @@ export class BattlefieldScene extends Phaser.Scene {
       return;
     }
 
-    // 執行移動
+    // 執行移動或攻擊
     if (this.selectedUnitId) {
       const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
-      const path = this.pathfindingService.findPath(
-        this.gameService.getGameState(),
-        { x: selectedUnit.x, y: selectedUnit.y },
-        { x, y },
-        selectedUnit.move
-      );
-
-      if (!path || path.length === 0) {
-        console.log('無法到達');
-        return;
+      var cmd: GameCommand;
+      var path;
+      // 執行攻擊
+      if (clickedUnit && clickedUnit?.ownerId !== currentPlayerId) {
+        // 執行攻擊
+        const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
+        cmd = {
+          id: 'cmd_' + Date.now(),
+          type: 'ATTACK',
+          playerId: currentPlayerId,
+          unitId: this.selectedUnitId,
+          targetId: clickedUnit.id,
+          from: { x: selectedUnit.x, y: selectedUnit.y },
+          to: { x, y },
+          timestamp: Date.now(),
+        };
       }
+      // 執行移動
+      else {
+        path = this.pathfindingService.findPath(
+          this.gameService.getGameState(),
+          { x: selectedUnit.x, y: selectedUnit.y },
+          { x, y },
+          selectedUnit.move
+        );
 
-      const cmd: GameCommand = {
-        id: 'cmd_' + Date.now(),
-        type: 'MOVE',
-        playerId: currentPlayerId,
-        unitId: this.selectedUnitId,
-        from: { x: selectedUnit.x, y: selectedUnit.y },
-        to: { x, y },
-        timestamp: Date.now(),
-      };
+        if (!path || path.length === 0) {
+          console.log('無法到達');
+          return;
+        }
+
+        cmd = {
+          id: 'cmd_' + Date.now(),
+          type: 'MOVE',
+          playerId: currentPlayerId,
+          unitId: this.selectedUnitId,
+          from: { x: selectedUnit.x, y: selectedUnit.y },
+          to: { x, y },
+          timestamp: Date.now(),
+        };
+      }
 
       const result = this.gameService.execute(cmd);
       if (result.success) {
         this.clearMovableArea(); // 清除可移動範圍顯示
         this.clearAttackableArea(); // 清除可攻擊範圍顯示
-        this.moveUnitAlongPath(this.selectedUnitId, path);
+        if (cmd.type === 'ATTACK') {
+          this.playAttackAnimation(this.selectedUnitId, clickedUnit?.id || '');
+        } else {
+          this.moveUnitAlongPath(this.selectedUnitId, path || []);
+        }
         // this.updateUnitPosition(this.selectedUnitId, x, y);
         this.selectedUnitId = null;
       }
@@ -216,7 +313,10 @@ export class BattlefieldScene extends Phaser.Scene {
 
     // 繪製可移動範圍
     this.movableAreaGraphics = this.add.graphics();
-    this.movableAreaGraphics.fillStyle(GAME_CONFIG.COLOR.MOVABLE_AREA, GAME_CONFIG.COLOR.MOVABLE_AREA_ALPHA);
+    this.movableAreaGraphics.fillStyle(
+      GAME_CONFIG.COLOR.MOVABLE_AREA,
+      GAME_CONFIG.COLOR.MOVABLE_AREA_ALPHA
+    );
     movableArea.forEach((pos) => {
       this.movableAreaGraphics!.fillRect(
         pos.x * this.tileSize,
@@ -243,7 +343,10 @@ export class BattlefieldScene extends Phaser.Scene {
     );
     // 繪製可攻擊範圍
     this.attackableAreaGraphics = this.add.graphics();
-    this.attackableAreaGraphics.fillStyle(GAME_CONFIG.COLOR.ATTACKABLE_AREA, GAME_CONFIG.COLOR.ATTACKABLE_AREA_ALPHA);
+    this.attackableAreaGraphics.fillStyle(
+      GAME_CONFIG.COLOR.ATTACKABLE_AREA,
+      GAME_CONFIG.COLOR.ATTACKABLE_AREA_ALPHA
+    );
     attackableArea.forEach((pos) => {
       this.attackableAreaGraphics!.fillRect(
         pos.x * this.tileSize,

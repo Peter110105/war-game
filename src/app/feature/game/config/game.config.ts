@@ -1,10 +1,10 @@
 interface GameConfig {
   // 遊戲基本配置
-  TILE_SIZE: number;    // 格子像素大小
+  TILE_SIZE: number; // 格子像素大小
   CANVAS_WIDTH: number; // 遊戲寬度(像素)
   CANVAS_HEIGHT: number; // 遊戲高度(像素)
   GRID_COLS: number; // 網格列數
-  GRID_ROWS: number;  // 網格行數
+  GRID_ROWS: number; // 網格行數
   BACKGROUND: string; // 背景顏色
   LINE_STYLE: {
     COLOR: number; // 線條顏色
@@ -30,6 +30,7 @@ interface GameConfig {
   ANIMATION: {
     MOVE_DURATION: number; // 移動動畫持續時間（毫秒）
     ATTACK_DURATION: number; // 攻擊動畫持續時間（毫秒）
+    DEATH_DURATION: number; // 死亡動畫持續時間（毫秒）
     DELAY_BETWEEN_ACTIONS: number; // 動作之間的延遲（毫秒）
   };
 }
@@ -62,6 +63,7 @@ export const GAME_CONFIG: GameConfig = {
   ANIMATION: {
     MOVE_DURATION: 300,
     ATTACK_DURATION: 500,
+    DEATH_DURATION: 1000,
     DELAY_BETWEEN_ACTIONS: 200,
   },
 };

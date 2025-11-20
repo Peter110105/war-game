@@ -22,7 +22,7 @@ export class MovementProcessor {
     // 3.單位檢查
     const unit = state.units.find(u => u.id === moveCmd.unitId);
     if(!unit) return { success: false, message: 'unit not found' };
-    if(unit.actionState.hasMoved) return { success: false, message: 'unit already moved this turn' };
+    if(unit.actionState.hasMoved || !unit.actionState.canAct) return { success: false, message: 'unit already moved this turn' };
     if(!unit.alive) return { success: false, message: 'unit dead' };
     if(unit.ownerId !== moveCmd.playerId) return { success: false, message: 'not your unit' };
 
