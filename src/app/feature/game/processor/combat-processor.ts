@@ -13,7 +13,7 @@ export class CombatProcessor {
   execute(
     state: GameState,
     cmd: GameCommand
-  ): { success: boolean; message?: string } {
+  ): { success: boolean; message?: string; damage?: number; isDead?: boolean } {
     // 1.判斷處理器是否正確
     if (cmd.type != 'ATTACK')
       return { success: false, message: 'combat not implemented' };
@@ -61,14 +61,14 @@ export class CombatProcessor {
 
       this.eventService.emit({
         type: GameEventType.UNIT_DIED,
-        data:{
+        data: {
           unitId: defender.id,
-          damage
-        }
-      })
+          damage,
+        },
+      });
     }
 
     attacker.actionState.hasAttacked = true;
-    return { success: true, message: 'combat success'};
+    return { success: true, message: 'combat success', damage, isDead };
   }
 }

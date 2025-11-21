@@ -1,5 +1,5 @@
-import { Injectable } from "@angular/core";
-import { Unit } from "../model/unit.model";
+import { Injectable } from '@angular/core';
+import { Unit } from '../model/unit.model';
 
 @Injectable({ providedIn: 'root' })
 export class CombatCalculator {
@@ -14,7 +14,8 @@ export class CombatCalculator {
   }
   // 檢查是否可攻擊
   public canAttack(attacker: Unit, defender: Unit): boolean {
-    const distance = Math.abs(attacker.x - defender.x) + Math.abs(attacker.y - defender.y);
+    const distance =
+      Math.abs(attacker.x - defender.x) + Math.abs(attacker.y - defender.y);
 
     // 不能攻擊己方單位
     if (attacker.ownerId === defender.ownerId) return false;
@@ -22,4 +23,3 @@ export class CombatCalculator {
     return distance <= attacker.range;
   }
 }
-

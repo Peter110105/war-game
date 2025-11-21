@@ -1,9 +1,12 @@
-import Phaser from "phaser";
-import { GameCommand } from "../../command/command.interface";
-import { GameStateService } from "../../service/game-state.service";
-import { GameEventService, GameEventType } from "../../service/game-event.service";
-import { PathfindingService } from "../../logic/path-finding.service";
-import { GAME_CONFIG } from "../../config/game.config";
+import Phaser from 'phaser';
+import { GameCommand } from '../../command/command.interface';
+import { GameStateService } from '../../service/game-state.service';
+import {
+  GameEventService,
+  GameEventType,
+} from '../../service/game-event.service';
+import { PathfindingService } from '../../logic/path-finding.service';
+import { GAME_CONFIG } from '../../config/game.config';
 
 export class BattlefieldScene extends Phaser.Scene {
   private tileSize = GAME_CONFIG.TILE_SIZE;
@@ -44,10 +47,15 @@ export class BattlefieldScene extends Phaser.Scene {
       const y = Math.floor(pointer.y / this.tileSize);
       this.showUnitTooltip(x, y);
     });
-    // 訂閱死亡事件
+    // 訂閱遊戲事件
     this.eventService.events$.subscribe((event) => {
-      if(event.type === GameEventType.UNIT_DIED){
+      if (event.type === GameEventType.UNIT_DIED) {
         this.playDeathAnimation(event.data.unitId);
+      }
+      if (event.type === GameEventType.TURN_ENDED) {
+        this.selectedUnitId = null;
+        this.clearMovableArea();
+        this.clearAttackableArea();
       }
     });
   }
@@ -164,6 +172,9 @@ export class BattlefieldScene extends Phaser.Scene {
       x: unitSprite.x + ((targetSprite.x - unitSprite.x) / distance) * 30,
       y: unitSprite.y + ((targetSprite.y - unitSprite.y) / distance) * 30,
     };
+    // 紀錄原始位置
+    const originalX = unitSprite.x;
+    const originalY = unitSprite.y;
 
     // 繪製攻擊動畫
     this.tweens.add({
@@ -174,6 +185,7 @@ export class BattlefieldScene extends Phaser.Scene {
       yoyo: true,
       ease: 'Power2',
       onComplete: () => {
+        unitSprite.setPosition(originalX, originalY);
         this.playDamageAnimation(targetId); // 播放受傷動畫
         this.eventService.emit({
           type: GameEventType.UNIT_ATTACKED,
@@ -197,12 +209,13 @@ export class BattlefieldScene extends Phaser.Scene {
     });
     console.log('damage-sound');
   }
-  private playDeathAnimation(unitId: string){
+  private playDeathAnimation(unitId: string) {
     const unitSprite = this.unitSprites.get(unitId);
     if (!unitSprite) return;
 
     console.log('playDeathAnimation');
     console.log('dead-sound');
+
     this.tweens.add({
       targets: unitSprite,
       alpha: 0, // 目標不透明度為 0 (完全透明)
@@ -211,9 +224,10 @@ export class BattlefieldScene extends Phaser.Scene {
       onComplete: () => {
         unitSprite.destroy();
         this.unitSprites.delete(unitId);
+
+        // this.drawUnits();
       },
     });
-
   }
   private handleClick(x: number, y: number) {
     const currentPlayerId = this.gameService.currentPlayerId;
@@ -242,7 +256,7 @@ export class BattlefieldScene extends Phaser.Scene {
     if (this.selectedUnitId) {
       const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
       var cmd: GameCommand;
-      var path;
+      var path: { x: number; y: number }[] | null = null;
       // 執行攻擊
       if (clickedUnit && clickedUnit?.ownerId !== currentPlayerId) {
         // 執行攻擊
@@ -288,7 +302,17 @@ export class BattlefieldScene extends Phaser.Scene {
         this.clearMovableArea(); // 清除可移動範圍顯示
         this.clearAttackableArea(); // 清除可攻擊範圍顯示
         if (cmd.type === 'ATTACK') {
+          this.input.enabled = false;
+
           this.playAttackAnimation(this.selectedUnitId, clickedUnit?.id || '');
+
+          // 計算總動畫時間(攻擊 + 受傷)
+          const totalAnimationTime =
+            GAME_CONFIG.ANIMATION.ATTACK_DURATION +
+            GAME_CONFIG.ANIMATION.DEATH_DURATION;
+          this.time.delayedCall(totalAnimationTime, () => {
+            this.input.enabled = true;
+          });
         } else {
           this.moveUnitAlongPath(this.selectedUnitId, path || []);
         }
