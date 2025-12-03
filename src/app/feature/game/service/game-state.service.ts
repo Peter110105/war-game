@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { GameStateLoaderService } from '../../../core/service/game-state-loader.service';
 import { GameEventService, GameEventType } from './game-event.service';
-import { GameState } from '../model/game-state.model'
+import { GameState } from '../model/game-state.model';
 import { GameCommand } from '../command/command.interface';
 import { MovementProcessor } from '../processor/movement-processor';
 import { CombatProcessor } from '../processor/combat-processor';
 import { Unit } from '../model/unit.model';
 import { Player } from '../model/player.model';
+import { GameStateFactory } from '../factory/game-state.factory';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateService {
@@ -16,12 +17,13 @@ export class GameStateService {
     private eventService: GameEventService,
     private movementProcessor: MovementProcessor,
     private combatProcessor: CombatProcessor,
-    private gameStateLoaderService: GameStateLoaderService
+    private gameStateLoaderService: GameStateLoaderService,
+    private gameStateFactory: GameStateFactory
   ) {
-    this.state = this.createDefaultState(); // 先給預設值
+    this.state = this.gameStateFactory.createDefaultGame();
     // 非同步加載資料
-    this.gameStateLoaderService.loadInitialState().subscribe((state) => {
-      this.state = state;
+    this.gameStateLoaderService.loadInitialState().subscribe((loadedState) => {
+      this.state = loadedState;
     });
   }
 
@@ -151,16 +153,5 @@ export class GameStateService {
     if (!unit) return false;
 
     return unit.actionState.canAct && !unit.actionState.hasMoved;
-  }
-  private createDefaultState(): GameState {
-    return {
-      width: 8,
-      height: 6,
-      tiles: [],
-      units: [],
-      players: [],
-      currentPlayerIndex: 0,
-      turn: 1,
-    };
   }
 }
