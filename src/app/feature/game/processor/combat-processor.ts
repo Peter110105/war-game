@@ -67,8 +67,17 @@ export class CombatProcessor {
         },
       });
     }
-
+    // 發送攻擊事件 (用於更新血條)
     attacker.actionState.hasAttacked = true;
+    this.eventService.emit({
+      type: GameEventType.UNIT_ATTACKED,
+      data: {
+        unitId: attacker.id,
+        defenderId: defender.id,
+        damage,
+      },
+    });
+
     return { success: true, message: 'combat success', damage, isDead };
   }
 }

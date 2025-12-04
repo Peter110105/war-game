@@ -10,6 +10,7 @@ import { GAME_CONFIG } from '../../config/game.config';
 import { UnitRendererManager } from '../manager/unit-renderer.manager';
 import { AnimationManager } from '../manager/animation.manager';
 import { InputManager } from '../manager/input.manager';
+import { HpBarManager } from '../manager/hp-bar.manager';
 
 /**
  * 遊戲場景(協調者)
@@ -24,6 +25,7 @@ export class BattlefieldScene extends Phaser.Scene {
   private unitRenderer!: UnitRendererManager;
   private animationMgr!: AnimationManager;
   private inputMgr!: InputManager;
+  private hpBarMgr!: HpBarManager;
 
   // 狀態
   private selectedUnitId: string | null = null;
@@ -49,10 +51,11 @@ export class BattlefieldScene extends Phaser.Scene {
     this.unitRenderer = new UnitRendererManager(this);
     this.animationMgr = new AnimationManager(this);
     this.inputMgr = new InputManager(this);
+    this.hpBarMgr = new HpBarManager(this);
 
     // 繪製地圖和單位
     this.drawMap();
-    this.unitRenderer.drawUnits(this.gameService.getGameState());
+    this.drawUnitsWithHpBar();
 
     // 訂閱事件
     this.subscribeToEvents();
@@ -85,6 +88,21 @@ export class BattlefieldScene extends Phaser.Scene {
   private subscribeToEvents() {
     this.eventService.events$.subscribe((event) => {
       switch (event.type) {
+        case GameEventType.UNIT_MOVED:
+          const unit = this.gameService.getUnitById(event.data.unitId);
+          if (unit) {
+            console.log('更新血條');
+            this.hpBarMgr.updateHpBar(unit);
+          }
+          break;
+        case GameEventType.UNIT_ATTACKED:
+          // 攻擊後更新血條
+          const defender = this.gameService.getUnitById(event.data.defenderId);
+          console.log('更新血條');
+          if (defender) {
+            this.hpBarMgr.updateHpBar(defender);
+          }
+          break;
         case GameEventType.UNIT_DIED:
           this.handleUnitDeath(event.data.unitId);
           break;
@@ -94,6 +112,17 @@ export class BattlefieldScene extends Phaser.Scene {
           this.clearAttackableArea();
           break;
       }
+    });
+  }
+
+  // 繪製單位和血條
+  private drawUnitsWithHpBar() {
+    const gameState = this.gameService.getGameState();
+    this.unitRenderer.drawUnits(gameState);
+
+    // 為每個單位創建血條
+    gameState.units.forEach((unit) => {
+      this.hpBarMgr.createHpBar(unit);
     });
   }
 
@@ -226,7 +255,7 @@ export class BattlefieldScene extends Phaser.Scene {
           () => {
             this.animationMgr.playDamageAnimation(defenderSprite);
             // 計算總動畫時間
-            const totalTime = GAME_CONFIG.ANIMATION.ATTACK_DURATION * 2 + 200;
+            const totalTime = GAME_CONFIG.ANIMATION.ATTACK_DURATION * 2 + 200; // TEST
             this.time.delayedCall(totalTime, () => {
               this.inputMgr.enable();
             });
@@ -243,6 +272,7 @@ export class BattlefieldScene extends Phaser.Scene {
     if (sprite) {
       this.animationMgr.playDeathAnimation(sprite, () => {
         this.unitRenderer.removeUnit(unitId);
+        this.hpBarMgr.removeHpBar(unitId);
       });
     }
   }
