@@ -91,8 +91,8 @@ export class BattlefieldScene extends Phaser.Scene {
         case GameEventType.UNIT_MOVED:
           const unit = this.gameService.getUnitById(event.data.unitId);
           if (unit) {
-            console.log('更新血條');
-            this.hpBarMgr.updateHpBar(unit);
+            console.log('移動血條');
+            this.hpBarMgr.moveHpBar(unit);
           }
           break;
         case GameEventType.UNIT_ATTACKED:

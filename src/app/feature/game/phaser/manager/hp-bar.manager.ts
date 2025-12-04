@@ -115,4 +115,21 @@ export class HpBarManager {
     if (ratio > 0.3) return 0xffff00; // 黄色
     return 0xff0000; // 红色
   }
+
+  /**
+   * 移動血條
+   * @param unit 單位
+   */
+  public moveHpBar(unit: Unit): void {
+    const data = this.hpBars.get(unit.id);
+    if (!data) return;
+
+    // 移動位置
+    data.x =
+      unit.x * this.tileSize + this.tileSize / 2 - (this.tileSize * 0.8) / 2;
+    data.y = unit.y * this.tileSize - this.tileSize / 2 + 30;
+
+    this.hpBars.set(unit.id, data);
+    this.drawHpBar(unit);
+  }
 }
