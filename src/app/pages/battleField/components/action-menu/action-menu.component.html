@@ -1,0 +1,45 @@
+<!-- action-menu.component.html -->
+<div
+  class="action-menu"
+  *ngIf="selectedUnit"
+  [style.left.px]="position.x"
+  [style.top.px]="position.y"
+>
+  <div class="menu-header">
+    <span class="unit-name">{{ selectedUnit.name }}</span>
+    <span class="unit-status">
+      {{ selectedUnit.actionState.hasMoved ? "已移動" : "" }}
+      {{ selectedUnit.actionState.hasAttacked ? "已攻擊" : "" }}
+    </span>
+  </div>
+
+  <div class="menu-buttons">
+    <button
+      class="action-btn move-btn"
+      [disabled]="!canMove"
+      (click)="selectAction('move')"
+    >
+      <span class="btn-icon">🚶</span>
+      <span class="btn-text">移動</span>
+    </button>
+
+    <button
+      class="action-btn attack-btn"
+      [disabled]="!canAttack"
+      (click)="selectAction('attack')"
+    >
+      <span class="btn-icon">⚔️</span>
+      <span class="btn-text">攻擊</span>
+    </button>
+
+    <button class="action-btn wait-btn" (click)="selectAction('wait')">
+      <span class="btn-icon">⏸️</span>
+      <span class="btn-text">待機</span>
+    </button>
+
+    <button class="action-btn cancel-btn" (click)="selectAction('cancel')">
+      <span class="btn-icon">❌</span>
+      <span class="btn-text">取消</span>
+    </button>
+  </div>
+</div>

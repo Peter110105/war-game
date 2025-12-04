@@ -1,28 +1,37 @@
 <div class="battlefield-container">
-  <div #gameContainer></div>
+  <!-- Phaser 遊戲畫布 -->
+  <div #gameContainer class="game-canvas"></div>
 
-  <div class="game-ui">
+  <!-- Angular UI 覆蓋層 -->
+  <div class="ui-overlay">
+    <!-- 回合資訊 -->
     <div class="turn-info">
-      <p>回合: {{ gameState.turn  }}</p>
-      <p>玩家: {{ currentPlayer.name }}</p>
+      <div class="info-item">
+        <span class="label">回合:</span>
+        <span class="value">{{ gameState.turn }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">當前玩家:</span>
+        <span class="value player-name">{{ currentPlayer?.name }}</span>
+      </div>
     </div>
 
-    <div class="unit-info">
-      @if (selectedUnit) {
-        <h3>單位資訊</h3>
-        <p>名稱: {{ selectedUnit.name }}</p>
-        <p>生命值: {{ selectedUnit.hp }}/{{selectedUnit.maxHp}}</p>
-        <p>是否已移動: {{ selectedUnit.actionState.hasMoved ? '✓' : '-' }}</p>
-        <p>是否已攻擊: {{ selectedUnit.actionState.hasAttacked ? '✓' : '-' }}</p>
-      }
-    <div>
-
+    <!-- 結束回合按鈕 -->
     <button
-      (click)="endTurn()"
-      [disabled]="!isCurrentPlayer()"
       class="end-turn-btn"
+      [disabled]="!isCurrentPlayer()"
+      (click)="endTurn()"
     >
       結束回合
     </button>
+
+    <!-- 命令選單 -->
+    @if(showActionMenu){
+    <app-action-menu
+      [selectedUnit]="selectedUnit"
+      [position]="menuPosition"
+      (actionSelected)="onActionSelected($event)"
+    ></app-action-menu>
+    }
   </div>
 </div>
