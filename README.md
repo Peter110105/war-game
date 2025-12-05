@@ -59,6 +59,7 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
 ## 目錄結構
+
 ```
 src/
 ├─ app/
@@ -73,20 +74,23 @@ src/
 │   │  └─ game/
 │   │     ├─ ai/               // AI 相關
 │   │     │  ├─ ai-controller.ts 暫無
-│   │     │  └─ 
+│   │     │  └─
 │   |     │
 │   │     ├─ command/         // Command Pattern
 │   │     │  └─ command.interface.ts
 │   |     │
 │   │     ├─ config/
 │   │     │  └─ game-config.ts
-│   |     │
+│   │     │
+│   │     ├─ factory/
+│   │     │  └─ game-state.factory.ts // 負責: 創建遊戲狀態
+│   │     │
 │   │     ├─logic/
-│   │     │  ├─path-finding.service.ts
-│   │     │  └─combat-calcualtor.service.ts
+│   │     │  ├─path-finding.service.ts // 負責: 找路
+│   │     │  └─combat-calcualtor.service.ts // 負責: 戰鬥計算
 │   │     │
 │   │     ├─ model/           // 遊戲資料模型
-│   │     │  ├─ game-state.model.ts 
+│   │     │  ├─ game-state.model.ts
 │   │     │  ├─ player.model.ts
 │   │     │  ├─ tile.model.ts
 │   │     │  └─ unit.model.ts
@@ -96,8 +100,9 @@ src/
 │   │     │  │  ├─ unit-sprite.ts 暫無
 │   │     │  │  └─ tile-sprite.ts 暫無
 │   │     │  ├─ manager/
-│   │     │  │  ├─ input-manager.ts 暫無
-│   │     │  │  └─ animation-manager.ts 暫無
+│   │     │  │  ├─ animation-manager.ts // 負責: 播放動畫
+│   │     │  │  ├─ input-manager.ts  // 負責: 處理輸入
+│   │     │  │  └─ unit-renderer.manager.ts // // 負責: 繪製單位
 │   │     │  ├─ scene/
 │   │     │  │  ├─ battlefield.scene.ts // 負責遊戲畫面的渲染和使用者輸入處理。
 │   │     │  │  └─ ui-overlay.scene.ts 暫無

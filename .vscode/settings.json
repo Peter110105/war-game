@@ -1,4 +1,68 @@
 {
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "todo-tree.general.tags": [
+    // "-",
+    // "!",
+    // "?",
+    // ">",
+    "TODO",
+    "FIXME",
+    "TEST"
+  ],
+  "todo-tree.highlights.customHighlight": {
+    // "-": {
+    // 	"background": "#222",
+    // 	"foreground": "#6D8CB4",
+    // 	"iconColour": "#6D8CB4",
+    // 	"icon": "check",
+    // 	"type": "text-and-comment",
+    // 	"hideFromTree": true
+    // },
+    // "!": {
+    // 	"background": "#222",
+    // 	"foreground": "#d9444a",
+    // 	"iconColour": "#d9444a",
+    // 	"icon": "check",
+    // 	"type": "text-and-comment",
+    // 	"hideFromTree": true
+    // },
+    // "?": {
+    // 	"background": "#222",
+    // 	"foreground": "#f5c018",
+    // 	"iconColour": "#f5c018",
+    // 	"icon": "check",
+    // 	"type": "text-and-comment",
+    // 	"hideFromTree": true
+    // },
+    // ">": {
+    // 	"background": "#222",
+    // 	"foreground": "#fff",
+    // 	"iconColour": "#fff",
+    // 	"icon": "check",
+    // 	"type": "text-and-comment",
+    // 	"hideFromTree": true
+    // },
+    "TODO": {
+      "background": "#f5c018",
+      "foreground": "#000",
+      "iconColour": "#f5c018",
+      "icon": "check",
+      "type": "text-and-comment"
+    },
+    "FIXME": {
+      "background": "#d9444a",
+      "foreground": "#000",
+      "iconColour": "#d9444a",
+      "type": "text-and-comment"
+    },
+    "TEST": {
+      "background": "#6D8CB4",
+      "foreground": "#000",
+      "iconColour": "#6D8CB4",
+      "icon": "check",
+      "type": "text-and-comment",
+      "hideFromTree": true
+    },
+  },
 }

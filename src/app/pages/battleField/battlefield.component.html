@@ -4,6 +4,9 @@
 
   <!-- Angular UI 覆蓋層 -->
   <div class="ui-overlay">
+    <!-- 單位資訊面板 -->
+    <app-unit-info-panel [unit]="selectedUnit"></app-unit-info-panel>
+
     <!-- 回合資訊 -->
     <div class="turn-info">
       <div class="info-item">
@@ -12,7 +15,7 @@
       </div>
       <div class="info-item">
         <span class="label">當前玩家:</span>
-        <span class="value player-name">{{ currentPlayer?.name }}</span>
+        <span class="value player-name">{{ currentPlayer.name }}</span>
       </div>
     </div>
 

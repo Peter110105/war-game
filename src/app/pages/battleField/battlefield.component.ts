@@ -20,11 +20,12 @@ import {
   ActionMenuComponent,
   ActionType,
 } from './components/action-menu/action-menu.component';
+import { UnitInfoPanelComponent } from './components/unit-info-panel/unit-info-panel.component';
 
 @Component({
   selector: 'app-battlefield',
   standalone: true,
-  imports: [CommonModule, ActionMenuComponent],
+  imports: [CommonModule, ActionMenuComponent, UnitInfoPanelComponent],
   templateUrl: './battlefield.component.html',
   styleUrls: ['./battlefield.component.css'],
 })
