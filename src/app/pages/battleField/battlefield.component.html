@@ -1,12 +1,22 @@
 <div class="battlefield-container">
   <!-- Phaser 遊戲畫布 -->
-  <div #gameContainer class="game-canvas"></div>
+  <div class="game-canvas">
+    <div #gameContainer class="game-canvas"></div>
 
-  <!-- Angular UI 覆蓋層 -->
-  <div class="ui-overlay">
-    <!-- 單位資訊面板 -->
-    <app-unit-info-panel [unit]="selectedUnit"></app-unit-info-panel>
-
+    <!-- 命令選單覆蓋在遊戲上 -->
+    <div class="ui-overlay">
+      <!-- 命令選單 -->
+      @if(showActionMenu){
+      <app-action-menu
+        [selectedUnit]="selectedUnit"
+        [position]="menuPosition"
+        (actionSelected)="onActionSelected($event)"
+      ></app-action-menu>
+      }
+    </div>
+  </div>
+  <!-- 右側資訊欄 -->
+  <div class="info-panel">
     <!-- 回合資訊 -->
     <div class="turn-info">
       <div class="info-item">
@@ -19,6 +29,9 @@
       </div>
     </div>
 
+    <!-- 單位資訊面板 -->
+    <app-unit-info-panel [unit]="selectedUnit"></app-unit-info-panel>
+
     <!-- 結束回合按鈕 -->
     <button
       class="end-turn-btn"
@@ -27,14 +40,5 @@
     >
       結束回合
     </button>
-
-    <!-- 命令選單 -->
-    @if(showActionMenu){
-    <app-action-menu
-      [selectedUnit]="selectedUnit"
-      [position]="menuPosition"
-      (actionSelected)="onActionSelected($event)"
-    ></app-action-menu>
-    }
   </div>
 </div>

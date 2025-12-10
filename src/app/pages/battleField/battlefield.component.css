@@ -1,15 +1,18 @@
 .battlefield-container {
-  position: relative;
-  width: 800px;
-  height: 600px;
+  display: flex;
+  gap: 20px;
   margin: 20px auto;
-  border: 2px solid #333;
+  width: fit-content;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .game-canvas {
   width: 100%;
   height: 100%;
+  /* width: 800px;
+  height: 600px; */
+  border: 2px solid #333;
+  position: relative;
 }
 
 .ui-overlay {
@@ -25,33 +28,42 @@
   pointer-events: auto;
 }
 
+/* 右側資訊欄 */
+.info-panel {
+  width: 280px;
+  background: white;
+  border: 2px solid #333;
+  display: flex;
+  flex-direction: column;
+}
+
 /* 回合資訊 */
 .turn-info {
-  position: absolute;
-  top: 10px;
-  left: 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 12px 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   color: white;
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .info-item {
   display: flex;
   gap: 8px;
+  font-size: 14px;
 }
 
 .label {
   font-weight: normal;
   opacity: 0.9;
+  font-size: 13px;
 }
 
 .value {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .player-name {
@@ -60,9 +72,7 @@
 
 /* 結束回合按鈕 */
 .end-turn-btn {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
+  margin: auto 12px 12px 12px;
   padding: 12px 24px;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
