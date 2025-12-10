@@ -1,0 +1,168 @@
+/* game-result-modal.component.css */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  min-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: scaleIn 0.4s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 勝利樣式 */
+.modal-content.victory {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: 5px solid #ffa500;
+}
+
+/* 失敗樣式 */
+.modal-content.defeat {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 5px solid #4a5568;
+}
+
+/* 標題區 */
+.modal-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.result-icon {
+  font-size: 80px;
+  margin-bottom: 10px;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.result-title {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.victory .result-title {
+  color: #d97706;
+}
+
+.defeat .result-title {
+  color: white;
+}
+
+/* 內容區 */
+.modal-body {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.winner-name {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.victory .winner-name {
+  color: #d97706;
+}
+
+.defeat .winner-name {
+  color: white;
+}
+
+.victory-reason {
+  font-size: 20px;
+  opacity: 0.9;
+}
+
+.victory .victory-reason {
+  color: #92400e;
+}
+
+.defeat .victory-reason {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 按鈕區 */
+.modal-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.restart-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.restart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.restart-btn:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 24px;
+}
+
+.btn-text {
+  font-size: 18px;
+}

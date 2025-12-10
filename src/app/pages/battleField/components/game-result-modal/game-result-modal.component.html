@@ -1,0 +1,32 @@
+<!-- game-result-modal.component.html -->
+<div class="modal-overlay" *ngIf="isVisible">
+  <div
+    class="modal-content"
+    [class.victory]="isVictory"
+    [class.defeat]="!isVictory"
+  >
+    <!-- 標題 -->
+    <div class="modal-header">
+      <div class="result-icon">{{ isVictory ? "👑" : "💀" }}</div>
+      <h1 class="result-title">{{ isVictory ? "勝利!" : "失敗!" }}</h1>
+    </div>
+
+    <!-- 內容 -->
+    <div class="modal-body">
+      <div class="winner-name" *ngIf="winner">
+        {{ winner }}
+      </div>
+      <div class="victory-reason" *ngIf="reason">
+        {{ reason }}
+      </div>
+    </div>
+
+    <!-- 按鈕 -->
+    <div class="modal-footer">
+      <button class="restart-btn" (click)="onRestart()">
+        <span class="btn-icon">🔄</span>
+        <span class="btn-text">重新開始</span>
+      </button>
+    </div>
+  </div>
+</div>

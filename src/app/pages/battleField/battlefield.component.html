@@ -41,4 +41,13 @@
       結束回合
     </button>
   </div>
+
+  <!-- 遊戲結果彈窗 -->
+  <app-game-result-modal
+    [isVisible]="showResultModal"
+    [isVictory]="isVictory"
+    [winner]="winner"
+    [reason]="victoryReason"
+    (restart)="onRestart()"
+  ></app-game-result-modal>
 </div>

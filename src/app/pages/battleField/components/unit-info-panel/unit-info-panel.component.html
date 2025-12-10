@@ -1,4 +1,5 @@
-<div class="unit-info-panel" *ngIf="unit">
+@if (unit) {
+<div class="unit-info-panel">
   <!-- 標題區 -->
   <div class="panel-header">
     <div class="unit-name">{{ unit.name }}</div>
@@ -67,3 +68,4 @@
     </div>
   </div>
 </div>
+}

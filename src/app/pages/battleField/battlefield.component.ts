@@ -21,11 +21,18 @@ import {
   ActionType,
 } from './components/action-menu/action-menu.component';
 import { UnitInfoPanelComponent } from './components/unit-info-panel/unit-info-panel.component';
+import { GameResultModalComponent } from './components/game-result-modal/game-result-modal.component';
+import { VictoryService } from '../../feature/game/service/victory.service';
 
 @Component({
   selector: 'app-battlefield',
   standalone: true,
-  imports: [CommonModule, ActionMenuComponent, UnitInfoPanelComponent],
+  imports: [
+    CommonModule,
+    ActionMenuComponent,
+    UnitInfoPanelComponent,
+    GameResultModalComponent,
+  ],
   templateUrl: './battlefield.component.html',
   styleUrls: ['./battlefield.component.css'],
 })
@@ -39,10 +46,17 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
   showActionMenu = false;
   menuPosition = { x: 0, y: 0 };
 
+  // 遊戲結果狀態
+  showResultModal = false;
+  isVictory = false;
+  winner = '';
+  victoryReason = '';
+
   constructor(
     private gameService: GameStateService,
     private eventService: GameEventService,
-    private pathfindingService: PathfindingService
+    private pathfindingService: PathfindingService,
+    private victoryServiec: VictoryService
   ) {}
 
   get currentPlayer() {
@@ -155,7 +169,40 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
           this.showActionMenu = false;
           this.selectedUnit = null;
           break;
+        case GameEventType.UNIT_DIED:
+          this.checkGameOver();
+          break;
       }
     });
+  }
+
+  /**
+   * 檢查遊戲是否結束
+   */
+  private checkGameOver(): void {
+    const result = this.victoryServiec.checkVictory(
+      this.gameService.getGameState()
+    );
+
+    if (result.isGameOver) {
+      // 延遲顯示,讓死亡動畫播放完
+      setTimeout(() => {
+        this.showResultModal = true;
+        this.winner = result.winner || '';
+        this.victoryReason = result.reason || '';
+
+        // 判斷當前玩家是否勝利
+        const currentPlayerId = this.gameService.currentPlayerId;
+        this.isVictory = this.winner === currentPlayerId;
+      }, 1000);
+    }
+  }
+
+  /**
+   * 重新開始遊戲
+   */
+  onRestart(): void {
+    this.showResultModal = false;
+    window.location.reload(); // 簡單的重新載入頁面
   }
 }
