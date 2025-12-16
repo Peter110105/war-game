@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GameEventService {
   private eventSubject = new Subject<GameEvent>();
@@ -13,7 +13,7 @@ export class GameEventService {
   }
 }
 
-export interface GameEvent{
+export interface GameEvent {
   type: GameEventType;
   data: any;
 }
@@ -21,7 +21,11 @@ export interface GameEvent{
 export enum GameEventType {
   UNIT_SELECTED = 'UNIT_SELECTED',
   UNIT_MOVED = 'UNIT_MOVED',
-  TURN_ENDED = 'TURN_ENDED',
   UNIT_ATTACKED = 'UNIT_ATTACKED',
   UNIT_DIED = 'UNIT_DIED',
+  PLAYER_ACTION_MOVED = 'PLAYER_ACTION_MOVED',
+  PLAYER_ACTION_ATTACKED = 'PLAYER_ACTION_ATTACKED',
+  PLAYER_ACTION_CANCELLED = 'PLAYER_ACTION_CANCELLED',
+  PLAYER_ACTION_WAIT = 'PLAYER_ACTION_WAIT',
+  TURN_ENDED = 'TURN_ENDED',
 }

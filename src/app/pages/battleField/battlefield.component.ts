@@ -43,8 +43,12 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
   private eventSubscription?: Subscription;
   // UI狀態
   selectedUnit: Unit | null = null;
+  hoveredUnit: Unit | null = null; // 用於顯示資訊的單位
   showActionMenu = false;
   menuPosition = { x: 0, y: 0 };
+
+  // 當前模式
+  currentMode: 'idle' | 'move' | 'attack' = 'idle';
 
   // 遊戲結果狀態
   showResultModal = false;
@@ -106,26 +110,54 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
     switch (action) {
       case 'move':
         // 進入移動模式
+        this.currentMode = 'move';
         this.showActionMenu = false;
+
+        // 發送事件給 Phaser,只顯示移動範圍
+        this.eventService.emit({
+          type: GameEventType.PLAYER_ACTION_MOVED,
+          data: { unitId: this.selectedUnit?.id },
+        });
         break;
       case 'attack':
         // 進入攻擊模式
+        this.currentMode = 'attack';
         this.showActionMenu = false;
+
+        // 發送事件給 Phaser,只顯示攻擊範圍
+        this.eventService.emit({
+          type: GameEventType.PLAYER_ACTION_ATTACKED,
+          data: { unitId: this.selectedUnit?.id },
+        });
         break;
       case 'wait':
         // 待機 (標記單位已完成行動)
         if (this.selectedUnit) {
-          // this.selectedUnit.actionState.hasMoved = true;
-          // this.selectedUnit.actionState.hasAttacked = true;
+          this.selectedUnit.actionState.hasMoved = true;
+          this.selectedUnit.actionState.hasAttacked = true;
           this.selectedUnit.actionState.canAct = false;
         }
+
+        this.eventService.emit({
+          type: GameEventType.PLAYER_ACTION_WAIT,
+          data: { unitId: this.selectedUnit?.id },
+        });
+
         this.showActionMenu = false;
         this.selectedUnit = null;
+        this.currentMode = 'idle';
         break;
       case 'cancel':
         // 取消選擇
+        this.eventService.emit({
+          type: GameEventType.PLAYER_ACTION_CANCELLED,
+          data: { unitId: this.selectedUnit?.id },
+        });
+
         this.showActionMenu = false;
         this.selectedUnit = null;
+        this.hoveredUnit = null;
+        this.currentMode = 'idle';
         break;
     }
   }
@@ -148,27 +180,48 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
       switch (event.type) {
         case GameEventType.UNIT_SELECTED:
           const unit = this.gameService.getUnitAt(event.data.x, event.data.y);
-          if (unit && unit.ownerId === this.gameService.currentPlayerId) {
-            this.selectedUnit = unit;
-            // 計算選單位置 (單位右側)
-            this.menuPosition = {
-              x: event.data.x * 64 + 80,
-              y: event.data.y * 64,
-            };
-            this.showActionMenu = true;
+          if (unit) {
+            this.hoveredUnit = unit;
+            if (unit.ownerId === this.gameService.currentPlayerId) {
+              this.selectedUnit = unit;
+              // 計算選單位置 (單位右側)
+              this.menuPosition = {
+                x: event.data.x * 64 + 80,
+                y: event.data.y * 64,
+              };
+              this.showActionMenu = true;
+            } else {
+              this.selectedUnit = null;
+              this.showActionMenu = false;
+            }
           }
           console.log('Unit selected:', this.selectedUnit?.name);
           break;
+
         case GameEventType.UNIT_MOVED:
           console.log('Unit moved:', event.data);
           this.showActionMenu = false;
           this.selectedUnit = null;
+          this.hoveredUnit = null;
+          this.currentMode = 'idle';
           break;
+
+        case GameEventType.UNIT_ATTACKED:
+          console.log('Unit attacked:', event.data);
+          this.showActionMenu = false;
+          this.selectedUnit = null;
+          this.hoveredUnit = null;
+          this.currentMode = 'idle';
+          break;
+
         case GameEventType.TURN_ENDED:
           console.log('Turn ended:', event.data);
           this.showActionMenu = false;
           this.selectedUnit = null;
+          this.hoveredUnit = null;
+          this.currentMode = 'idle';
           break;
+
         case GameEventType.UNIT_DIED:
           this.checkGameOver();
           break;

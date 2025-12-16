@@ -11,6 +11,7 @@ import { UnitRendererManager } from '../manager/unit-renderer.manager';
 import { AnimationManager } from '../manager/animation.manager';
 import { InputManager } from '../manager/input.manager';
 import { HpBarManager } from '../manager/hp-bar.manager';
+import { Unit } from '../../model/unit.model';
 
 /**
  * 遊戲場景(協調者)
@@ -29,6 +30,7 @@ export class BattlefieldScene extends Phaser.Scene {
 
   // 狀態
   private selectedUnitId: string | null = null;
+  private currentMode: 'idle' | 'move' | 'attack' = 'idle'; // 模式
   private movableAreaGraphics?: Phaser.GameObjects.Graphics; // 可移動範圍圖形
   private attackableAreaGraphics?: Phaser.GameObjects.Graphics; // 可攻擊範圍圖形
   private unitTooltip?: Phaser.GameObjects.Text; // 單位提示文字
@@ -55,7 +57,7 @@ export class BattlefieldScene extends Phaser.Scene {
 
     // 繪製地圖和單位
     this.drawMap();
-    this.drawUnitsWithHpBar();
+    this.drawUnitsWithHpBars();
 
     // 訂閱事件
     this.subscribeToEvents();
@@ -111,12 +113,29 @@ export class BattlefieldScene extends Phaser.Scene {
           this.clearMovableArea();
           this.clearAttackableArea();
           break;
+        case GameEventType.PLAYER_ACTION_MOVED:
+          this.currentMode = 'move';
+          this.showMovableArea(event.data.unitId);
+          this.clearAttackableArea(); // 清除可攻擊範圍顯示
+          break;
+        case GameEventType.PLAYER_ACTION_ATTACKED:
+          this.currentMode = 'attack';
+          this.showAttackableArea(event.data.unitId);
+          this.clearMovableArea(); // 清除可移動範圍顯示
+          break;
+        case GameEventType.PLAYER_ACTION_WAIT:
+        case GameEventType.PLAYER_ACTION_CANCELLED:
+          this.currentMode = 'idle';
+          this.selectedUnitId = null;
+          this.clearMovableArea(); // 清除可移動範圍顯示
+          this.clearAttackableArea(); // 清除可攻擊範圍顯示
+          break;
       }
     });
   }
 
   // 繪製單位和血條
-  private drawUnitsWithHpBar() {
+  private drawUnitsWithHpBars() {
     const gameState = this.gameService.getGameState();
     this.unitRenderer.drawUnits(gameState);
 
@@ -155,40 +174,64 @@ export class BattlefieldScene extends Phaser.Scene {
     const currentPlayerId = this.gameService.currentPlayerId;
     const clickedUnit = this.gameService.getUnitAt(x, y);
 
-    // 選取我方單位
-    if (clickedUnit && clickedUnit.ownerId === currentPlayerId) {
-      // 如果該單位本回合已移動過，則不允許選取
-      if (clickedUnit.actionState.hasMoved) {
-        console.log('該單位本回合已移動過');
+    if (this.currentMode === 'idle') {
+      if (clickedUnit) {
+        // 不管敵方或我方,都發送事件顯示資訊
+        this.eventService.emit({
+          type: GameEventType.UNIT_SELECTED,
+          data: { x, y },
+        });
+        // 只有我方單位才能操控
+        if (clickedUnit.ownerId === currentPlayerId) {
+          if (
+            clickedUnit.actionState.hasMoved &&
+            clickedUnit.actionState.hasAttacked
+          ) {
+            console.log('該單位本回合已行動過');
+            return;
+          }
+          this.selectedUnitId = clickedUnit.id;
+          this.showMovableArea(clickedUnit.id);
+          this.showAttackableArea(clickedUnit.id);
+
+          console.log(`選擇單位: ${clickedUnit.name}`);
+          return;
+        } else {
+          console.log(`查看敵方單位: ${clickedUnit.name}`);
+        }
+      }
+    }
+
+    if (this.currentMode === 'move') {
+      if (!this.selectedUnitId) return;
+
+      if (clickedUnit) {
+        console.log('該位置有單位:', clickedUnit.name);
         return;
       }
-      // 選取單位
-      this.selectedUnitId = clickedUnit.id;
-      this.showMovableArea(clickedUnit.id);
-      this.showAttackableArea(clickedUnit.id);
-      this.eventService.emit({
-        type: GameEventType.UNIT_SELECTED,
-        data: { x, y },
-      });
-      console.log(`選擇單位: ${clickedUnit.name}`);
+      const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
+      this.executeMove(selectedUnit, x, y);
       return;
     }
 
-    // 執行命令
-    if (this.selectedUnitId) {
-      const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
+    if (this.currentMode === 'attack') {
+      if (!this.selectedUnitId) return;
 
-      // 判斷攻擊或移動
-      if (clickedUnit && clickedUnit?.ownerId !== currentPlayerId) {
-        this.executeAttack(selectedUnit, clickedUnit);
-      } else {
-        this.executeMove(selectedUnit, x, y);
+      if (!clickedUnit) {
+        console.log('請點擊敵方單位');
+        return;
       }
-      // this.scene.restart();
+      if (clickedUnit.ownerId === currentPlayerId) {
+        console.log('不能攻擊己方單位');
+        return;
+      }
+      const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
+      this.executeAttack(selectedUnit, clickedUnit);
+      return;
     }
   }
 
-  private executeMove(selectedUnit: any, targetX: number, targetY: number) {
+  private executeMove(selectedUnit: Unit, targetX: number, targetY: number) {
     const path = this.pathfindingService.findPath(
       this.gameService.getGameState(),
       { x: selectedUnit.x, y: selectedUnit.y },
@@ -222,11 +265,12 @@ export class BattlefieldScene extends Phaser.Scene {
         });
       }
       this.selectedUnitId = null;
+      this.currentMode = 'idle';
     }
     console.log(result);
   }
 
-  private executeAttack(attacker: any, defender: any) {
+  private executeAttack(attacker: Unit, defender: Unit) {
     const cmd: GameCommand = {
       id: 'cmd_' + Date.now(),
       type: 'ATTACK',
@@ -263,6 +307,7 @@ export class BattlefieldScene extends Phaser.Scene {
         );
       }
       this.selectedUnitId = null;
+      this.currentMode = 'idle';
     }
     console.log(result);
   }
