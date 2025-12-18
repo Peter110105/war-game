@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Unit } from '../model/unit.model';
 import { Player } from '../model/player.model';
 import { GameState } from '../model/game-state.model';
-import { TERRAIN_CONFIG, TerrainType } from '../config/terrain.config';
-import { Tile } from '../model/tile.model';
+import { getTerrainConfig } from '../config/terrain.config';
+import { TerrainType, Tile } from '../model/tile.model';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateFactory {
@@ -103,19 +103,19 @@ export class GameStateFactory {
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        let terrainType: TerrainType = 'plain';
+        let terrainType: TerrainType = TerrainType.PLAIN;
 
         // 邊緣為水域
         if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
-          terrainType = 'water';
+          terrainType = TerrainType.WATER;
         }
         // 中心點附近有山地
         else if (Math.abs(x - width / 2) < 2 && Math.abs(y - height / 2) < 1) {
-          terrainType = 'mountain';
+          terrainType = TerrainType.MOUNTAIN;
         }
         // 中間偶爾有森林
         else if (Math.random() < 0.3) {
-          terrainType = 'forest';
+          terrainType = TerrainType.FOREST;
         }
 
         tiles.push({
@@ -123,8 +123,8 @@ export class GameStateFactory {
           y,
           terrain: {
             terrainType,
-            moveCost: TERRAIN_CONFIG[terrainType].moveCost,
-            defenseBonus: TERRAIN_CONFIG[terrainType].defenseBonus,
+            moveCost: getTerrainConfig(terrainType).moveCost,
+            defenseBonus: getTerrainConfig(terrainType).defenseBonus,
           },
         });
       }

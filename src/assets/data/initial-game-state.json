@@ -5,18 +5,18 @@
     {
       "x": 0,
       "y": 0,
-      "terrain": { "terrainType": "plain", "moveCost": 1, "defenseBonus": 0 }
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
     },
     {
       "x": 1,
       "y": 0,
-      "terrain": { "terrainType": "plain", "moveCost": 1, "defenseBonus": 0 }
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
     },
     {
       "x": 2,
       "y": 0,
       "terrain": {
-        "terrainType": "mountain",
+        "terrainType": "MOUNTAIN",
         "moveCost": 3,
         "defenseBonus": 0.2
       }
@@ -24,12 +24,630 @@
     {
       "x": 3,
       "y": 0,
-      "terrain": { "terrainType": "water", "moveCost": 99, "defenseBonus": 0 }
+      "terrain": {
+        "terrainType": "MOUNTAIN",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
     },
     {
       "x": 4,
       "y": 0,
-      "terrain": { "terrainType": "plain", "moveCost": 1, "defenseBonus": 3 }
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "terrain": { "terrainType": "WATER", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 7,
+      "y": 0,
+      "terrain": { "terrainType": "WATER", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 8,
+      "y": 0,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 9,
+      "y": 0,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 1,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 2,
+      "y": 1,
+      "terrain": {
+        "terrainType": "MOUNTAIN",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 4,
+      "y": 1,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "terrain": { "terrainType": "WATER", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 7,
+      "y": 1,
+      "terrain": { "terrainType": "WATER", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 8,
+      "y": 1,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 9,
+      "y": 1,
+      "terrain": { "terrainType": "CASTLE", "moveCost": 1, "defenseBonus": 0.3 }
+    },
+
+    {
+      "x": 0,
+      "y": 2,
+      "terrain": { "terrainType": "CASTLE", "moveCost": 1, "defenseBonus": 0.3 }
+    },
+    {
+      "x": 1,
+      "y": 2,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 4,
+      "y": 2,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 2,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 7,
+      "y": 2,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 8,
+      "y": 2,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 9,
+      "y": 2,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 3,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 3,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 2,
+      "y": 3,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 3,
+      "y": 3,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 4,
+      "y": 3,
+      "terrain": {
+        "terrainType": "MOUNTAIN",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
+    },
+    {
+      "x": 5,
+      "y": 3,
+      "terrain": {
+        "terrainType": "MOUNTAIN",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
+    },
+    {
+      "x": 6,
+      "y": 3,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 7,
+      "y": 3,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 8,
+      "y": 3,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 9,
+      "y": 3,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 4,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 4,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 2,
+      "y": 4,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 3,
+      "y": 4,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 4,
+      "y": 4,
+      "terrain": {
+        "terrainType": "MOUNTAIN",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
+    },
+    {
+      "x": 5,
+      "y": 4,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 6,
+      "y": 4,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 7,
+      "y": 4,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 8,
+      "y": 4,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 9,
+      "y": 4,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 5,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 5,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 2,
+      "y": 5,
+      "terrain": { "terrainType": "WATER", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 3,
+      "y": 5,
+      "terrain": { "terrainType": "WATER", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 4,
+      "y": 5,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 5,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 5,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 7,
+      "y": 5,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 8,
+      "y": 5,
+      "terrain": {
+        "terrainType": "MOUNTAIN",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
+    },
+    {
+      "x": 9,
+      "y": 5,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 6,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 6,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 2,
+      "y": 6,
+      "terrain": { "terrainType": "WATER", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 3,
+      "y": 6,
+      "terrain": { "terrainType": "WATER", "moveCost": 99, "defenseBonus": 0 }
+    },
+    {
+      "x": 4,
+      "y": 6,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 6,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 6,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 7,
+      "y": 6,
+      "terrain": {
+        "terrainType": "MOUNTAIN",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
+    },
+    {
+      "x": 8,
+      "y": 6,
+      "terrain": {
+        "terrainType": "MOUNTAIN",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
+    },
+    {
+      "x": 9,
+      "y": 6,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+
+    {
+      "x": 0,
+      "y": 7,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 7,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 2,
+      "y": 7,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 3,
+      "y": 7,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 4,
+      "y": 7,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 7,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 7,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 7,
+      "y": 7,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 8,
+      "y": 7,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 9,
+      "y": 7,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 8,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 8,
+      "terrain": { "terrainType": "CASTLE", "moveCost": 1, "defenseBonus": 0.3 }
+    },
+    {
+      "x": 2,
+      "y": 8,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 3,
+      "y": 8,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 4,
+      "y": 8,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 8,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 8,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 7,
+      "y": 8,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 8,
+      "y": 8,
+      "terrain": { "terrainType": "CASTLE", "moveCost": 1, "defenseBonus": 0.3 }
+    },
+    {
+      "x": 9,
+      "y": 8,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 9,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 9,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 2,
+      "y": 9,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 3,
+      "y": 9,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 4,
+      "y": 9,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 9,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 9,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 7,
+      "y": 9,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 8,
+      "y": 9,
+      "terrain": { "terrainType": "FOREST", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 9,
+      "y": 9,
+      "terrain": { "terrainType": "PLAIN", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 8,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 8,
+      "terrain": { "terrainType": "城堡", "moveCost": 1, "defenseBonus": 0.3 }
+    },
+    {
+      "x": 2,
+      "y": 8,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 3,
+      "y": 8,
+      "terrain": { "terrainType": "森林", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 4,
+      "y": 8,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 8,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 8,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 7,
+      "y": 8,
+      "terrain": { "terrainType": "森林", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 8,
+      "y": 8,
+      "terrain": { "terrainType": "城堡", "moveCost": 1, "defenseBonus": 0.3 }
+    },
+    {
+      "x": 9,
+      "y": 8,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+
+    {
+      "x": 0,
+      "y": 9,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 1,
+      "y": 9,
+      "terrain": { "terrainType": "森林", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 2,
+      "y": 9,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 3,
+      "y": 9,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 4,
+      "y": 9,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 5,
+      "y": 9,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 6,
+      "y": 9,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 7,
+      "y": 9,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+    },
+    {
+      "x": 8,
+      "y": 9,
+      "terrain": { "terrainType": "森林", "moveCost": 2, "defenseBonus": 0.1 }
+    },
+    {
+      "x": 9,
+      "y": 9,
+      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
     }
   ],
   "players": [
@@ -44,7 +662,7 @@
       "id": "P2",
       "name": "玩家二",
       "team": "P2",
-      "aiControlled": true,
+      "aiControlled": false,
       "isActive": false
     }
   ],
@@ -56,14 +674,12 @@
       "ownerId": "P1",
       "x": 1,
       "y": 1,
-
       "maxHp": 100,
       "hp": 100,
       "attack": 50,
       "defense": 10,
       "move": 4,
       "range": 1,
-
       "alive": true,
       "actionState": {
         "hasMoved": false,
@@ -77,15 +693,13 @@
       "type": "archer",
       "ownerId": "P1",
       "x": 2,
-      "y": 1,
-
+      "y": 2,
       "maxHp": 80,
       "hp": 80,
-      "attack": 18,
+      "attack": 40,
       "defense": 6,
       "move": 3,
       "range": 2,
-
       "alive": true,
       "actionState": {
         "hasMoved": false,
@@ -98,16 +712,34 @@
       "name": "敵方步兵",
       "type": "soldier",
       "ownerId": "P2",
-      "x": 1,
-      "y": 2,
-
+      "x": 8,
+      "y": 8,
       "maxHp": 100,
-      "hp": 10,
-      "attack": 18,
+      "hp": 100,
+      "attack": 45,
       "defense": 8,
       "move": 4,
       "range": 1,
-
+      "alive": true,
+      "actionState": {
+        "hasMoved": false,
+        "hasAttacked": false,
+        "canAct": true
+      }
+    },
+    {
+      "id": "E2",
+      "name": "敵方弓兵",
+      "type": "archer",
+      "ownerId": "P2",
+      "x": 7,
+      "y": 8,
+      "maxHp": 80,
+      "hp": 80,
+      "attack": 38,
+      "defense": 5,
+      "move": 3,
+      "range": 2,
       "alive": true,
       "actionState": {
         "hasMoved": false,

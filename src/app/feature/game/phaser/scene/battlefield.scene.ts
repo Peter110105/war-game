@@ -36,6 +36,7 @@ export class BattlefieldScene extends Phaser.Scene {
   private movableAreaGraphics?: Phaser.GameObjects.Graphics; // 可移動範圍圖形
   private attackableAreaGraphics?: Phaser.GameObjects.Graphics; // 可攻擊範圍圖形
   private unitTooltip?: Phaser.GameObjects.Text; // 單位提示文字
+  private terrainTooltip?: Phaser.GameObjects.Text; // 地形提示文字
 
   constructor() {
     super('BattlefieldScene');
@@ -59,6 +60,7 @@ export class BattlefieldScene extends Phaser.Scene {
     this.terrainRenderer = new TerrainRendererManager(this);
 
     // 繪製地圖和單位
+    this.drawTerrain();
     this.drawMap();
     this.drawUnitsWithHpBars();
 
@@ -71,9 +73,16 @@ export class BattlefieldScene extends Phaser.Scene {
     });
     this.inputMgr.onPointerMove((x, y) => {
       this.showUnitTooltip(x, y);
+      this.showTerrainTooltip(x, y);
     });
   }
+  /** 繪製地形*/
+  private drawTerrain() {
+    const gameState = this.gameService.getGameState();
+    this.terrainRenderer.drawTerrain(gameState);
+  }
 
+  /** 繪製地圖網格 */
   private drawMap() {
     const g = this.add.graphics();
     g.lineStyle(1, GAME_CONFIG.LINE_STYLE.COLOR);
@@ -88,7 +97,6 @@ export class BattlefieldScene extends Phaser.Scene {
     ) {
       g.lineBetween(0, j, GAME_CONFIG.CANVAS_WIDTH, j);
     }
-    this.terrainRenderer.drawTerrain(this.gameService.getGameState());
   }
 
   private subscribeToEvents() {
@@ -138,7 +146,7 @@ export class BattlefieldScene extends Phaser.Scene {
     });
   }
 
-  // 繪製單位和血條
+  /**  繪製單位和血條 */
   private drawUnitsWithHpBars() {
     const gameState = this.gameService.getGameState();
     this.unitRenderer.drawUnits(gameState);
@@ -149,7 +157,7 @@ export class BattlefieldScene extends Phaser.Scene {
     });
   }
 
-  // 顯示單位提示文字
+  /**  顯示單位提示文字 */
   private showUnitTooltip(x: number, y: number) {
     const unit = this.gameService.getUnitAt(x, y);
     if (unit) {
@@ -171,6 +179,49 @@ export class BattlefieldScene extends Phaser.Scene {
       this.unitTooltip.setVisible(true);
     } else {
       this.unitTooltip?.setVisible(false);
+    }
+  }
+
+  /**  顯示地形提示文字 */
+  private showTerrainTooltip(x: number, y: number) {
+    // 如果該位置有單位，不顯示地形資訊
+    const unit = this.gameService.getUnitAt(x, y);
+    if (unit) {
+      this.terrainTooltip?.setVisible(false);
+      return;
+    }
+
+    const gameState = this.gameService.getGameState();
+    const tile = gameState.tiles.find((tile) => tile.x === x && tile.y === y);
+    if (tile) {
+      if (!this.terrainTooltip) {
+        this.terrainTooltip = this.add.text(0, 0, '', {
+          font: GAME_CONFIG.TEXT.FONT_FAMILY,
+          fontSize: 14,
+          color: GAME_CONFIG.TEXT.COLOR,
+          backgroundColor: '#1a1a1a',
+          padding: { x: 8, y: 6 },
+        });
+        this.terrainTooltip.setDepth(999);
+      }
+
+      const terrainInfo = this.terrainRenderer.getTerrainInfo(
+        tile.terrain.terrainType
+      );
+      const defenseText =
+        terrainInfo.defenseBonus > 0
+          ? `+${(terrainInfo.defenseBonus * 100).toFixed(0)}%`
+          : '0%';
+      this.terrainTooltip.setText(
+        `${terrainInfo.emoji} ${terrainInfo.name}\n移動消耗: ${terrainInfo.moveCost}\n防禦加成: ${defenseText}`
+      );
+      this.terrainTooltip.setPosition(
+        x * GAME_CONFIG.TILE_SIZE + 10,
+        y * GAME_CONFIG.TILE_SIZE + 40
+      );
+      this.terrainTooltip.setVisible(true);
+    } else {
+      this.terrainTooltip?.setVisible(false);
     }
   }
 

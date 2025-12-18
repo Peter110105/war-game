@@ -1,4 +1,10 @@
-import { TerrainType } from '../config/terrain.config';
+export enum TerrainType {
+  PLAIN = 'PLAIN',
+  FOREST = 'FOREST',
+  MOUNTAIN = 'MOUNTAIN',
+  WATER = 'WATER',
+  CASTLE = 'CASTLE',
+}
 
 export interface Tile {
   x: number;
@@ -10,5 +16,5 @@ export interface Tile {
 export interface Terrain {
   terrainType: TerrainType;
   moveCost: number;
-  defenseBonus: number; // 防禦加成 (0.1 = +10%)
+  defenseBonus: number; // 百分比形式 (0.1 = 10%, 0.2 = 20%)
 }
