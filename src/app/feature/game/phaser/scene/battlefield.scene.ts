@@ -12,6 +12,7 @@ import { AnimationManager } from '../manager/animation.manager';
 import { InputManager } from '../manager/input.manager';
 import { HpBarManager } from '../manager/hp-bar.manager';
 import { Unit } from '../../model/unit.model';
+import { TerrainRendererManager } from '../manager/terrain-renderer.manager';
 
 /**
  * 遊戲場景(協調者)
@@ -27,6 +28,7 @@ export class BattlefieldScene extends Phaser.Scene {
   private animationMgr!: AnimationManager;
   private inputMgr!: InputManager;
   private hpBarMgr!: HpBarManager;
+  private terrainRenderer!: TerrainRendererManager;
 
   // 狀態
   private selectedUnitId: string | null = null;
@@ -54,6 +56,7 @@ export class BattlefieldScene extends Phaser.Scene {
     this.animationMgr = new AnimationManager(this);
     this.inputMgr = new InputManager(this);
     this.hpBarMgr = new HpBarManager(this);
+    this.terrainRenderer = new TerrainRendererManager(this);
 
     // 繪製地圖和單位
     this.drawMap();
@@ -85,6 +88,7 @@ export class BattlefieldScene extends Phaser.Scene {
     ) {
       g.lineBetween(0, j, GAME_CONFIG.CANVAS_WIDTH, j);
     }
+    this.terrainRenderer.drawTerrain(this.gameService.getGameState());
   }
 
   private subscribeToEvents() {

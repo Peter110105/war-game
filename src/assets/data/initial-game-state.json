@@ -5,27 +5,31 @@
     {
       "x": 0,
       "y": 0,
-      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+      "terrain": { "terrainType": "plain", "moveCost": 1, "defenseBonus": 0 }
     },
     {
       "x": 1,
       "y": 0,
-      "terrain": { "terrainType": "平地", "moveCost": 1, "defenseBonus": 0 }
+      "terrain": { "terrainType": "plain", "moveCost": 1, "defenseBonus": 0 }
     },
     {
       "x": 2,
       "y": 0,
-      "terrain": { "terrainType": "高山", "moveCost": 3, "defenseBonus": 2 }
+      "terrain": {
+        "terrainType": "mountain",
+        "moveCost": 3,
+        "defenseBonus": 0.2
+      }
     },
     {
       "x": 3,
       "y": 0,
-      "terrain": { "terrainType": "水", "moveCost": 99, "defenseBonus": 0 }
+      "terrain": { "terrainType": "water", "moveCost": 99, "defenseBonus": 0 }
     },
     {
       "x": 4,
       "y": 0,
-      "terrain": { "terrainType": "城堡", "moveCost": 1, "defenseBonus": 3 }
+      "terrain": { "terrainType": "plain", "moveCost": 1, "defenseBonus": 3 }
     }
   ],
   "players": [

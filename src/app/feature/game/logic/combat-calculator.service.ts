@@ -4,9 +4,13 @@ import { Unit } from '../model/unit.model';
 @Injectable({ providedIn: 'root' })
 export class CombatCalculator {
   // 計算傷害
-  public calculateDamage(attacker: Unit, defender: Unit): number {
-    // 基本傷害計算公式：攻擊力 - 防禦力
-    const baseAttack = attacker.attack - defender.defense;
+  public calculateDamage(
+    attacker: Unit,
+    defender: Unit,
+    terrainBonus: number = 0
+  ): number {
+    // 基本傷害計算公式：攻擊力 - 防禦力 * (1 + 地形加成)
+    const baseAttack = attacker.attack - defender.defense * (1 + terrainBonus);
     // 為來可擴充其他因素，如地形、技能等
     // ...
 

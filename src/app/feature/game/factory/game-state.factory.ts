@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Unit } from '../model/unit.model';
 import { Player } from '../model/player.model';
 import { GameState } from '../model/game-state.model';
+import { TERRAIN_CONFIG, TerrainType } from '../config/terrain.config';
+import { Tile } from '../model/tile.model';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateFactory {
@@ -18,12 +20,14 @@ export class GameStateFactory {
     width: number = 8,
     height: number = 8,
     units: Unit[] = [],
-    players: Player[] = []
+    players: Player[] = [],
+    tiles: Tile[] = []
   ): GameState {
     return {
       width,
       height,
-      tiles: [],
+      tiles:
+        tiles.length > 0 ? tiles : this.createDefaultTerrain(width, height),
       units,
       players,
       currentPlayerIndex: 0,
@@ -91,6 +95,42 @@ export class GameStateFactory {
       },
     ];
   }
+  /**
+   * 建立預設地形
+   */
+  public createDefaultTerrain(width: number, height: number): any[] {
+    const tiles: Tile[] = [];
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let terrainType: TerrainType = 'plain';
+
+        // 邊緣為水域
+        if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
+          terrainType = 'water';
+        }
+        // 中心點附近有山地
+        else if (Math.abs(x - width / 2) < 2 && Math.abs(y - height / 2) < 1) {
+          terrainType = 'mountain';
+        }
+        // 中間偶爾有森林
+        else if (Math.random() < 0.3) {
+          terrainType = 'forest';
+        }
+
+        tiles.push({
+          x,
+          y,
+          terrain: {
+            terrainType,
+            moveCost: TERRAIN_CONFIG[terrainType].moveCost,
+            defenseBonus: TERRAIN_CONFIG[terrainType].defenseBonus,
+          },
+        });
+      }
+    }
+    return tiles;
+  }
 
   /**
    * 從配置建立遊戲狀態 (用於關卡系統)
@@ -101,8 +141,9 @@ export class GameStateFactory {
     const height = config.height || 8;
     const units = config.units || this.createDefaultUnits();
     const players = config.players || this.createDefaultPlayers();
+    const tiles = config.tiles || this.createDefaultTerrain(width, height);
 
-    return this.createNewGame(width, height, units, players);
+    return this.createNewGame(width, height, units, players, tiles);
   }
 
   /**
@@ -113,7 +154,8 @@ export class GameStateFactory {
       8,
       8,
       this.createDefaultUnits(),
-      this.createDefaultPlayers()
+      this.createDefaultPlayers(),
+      this.createDefaultTerrain(8, 8)
     );
   }
 }

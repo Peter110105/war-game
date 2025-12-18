@@ -48,8 +48,13 @@ export class CombatProcessor {
       return { success: false, message: 'cannot attack target' };
     }
 
+    const tile = state.tiles.find(
+      (t) => t.x === defender.x && t.y === defender.y
+    );
+    const terrainBonus = tile?.terrain.defenseBonus ?? 0;
+
     // 5.計算傷害並更新hp
-    const damage = calculator.calculateDamage(attacker, defender);
+    const damage = calculator.calculateDamage(attacker, defender, terrainBonus);
     defender.hp -= damage;
 
     // 6.檢查目標是否死亡
