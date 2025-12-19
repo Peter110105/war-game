@@ -81,42 +81,66 @@ export enum TargetType {
  * 觸發時機
  */
 export enum TriggerTiming {
-  ALWAYS = 'ALWAYS', // 始終生效（被動）
-  ON_ATTACK = 'ON_ATTACK', // 攻擊時
-  ON_DEFEND = 'ON_DEFEND', // 防禦時
-  ON_KILL = 'ON_KILL', // 擊殺時
-  ON_DAMAGED = 'ON_DAMAGED', // 受傷時
-  ON_TURN_START = 'ON_TURN_START', // 回合開始時
-  ON_TURN_END = 'ON_TURN_END', // 回合結束時
-  ON_MOVE = 'ON_MOVE', // 移動時
-  ON_HP_LOW = 'ON_HP_LOW', // 生命值低於閾值時
-  MANUAL = 'MANUAL', // 手動觸發（主動技能）
+  /** 始終生效（被動） */
+  ALWAYS = 'ALWAYS',
+  /** 攻擊時 */
+  ON_ATTACK = 'ON_ATTACK',
+  /** 防禦時 */
+  ON_DEFEND = 'ON_DEFEND',
+  /** 擊殺時 */
+  ON_KILL = 'ON_KILL',
+  /** 受傷時 */
+  ON_DAMAGED = 'ON_DAMAGED',
+  /** 回合開始時 */
+  ON_TURN_START = 'ON_TURN_START',
+  /** 回合結束時 */
+  ON_TURN_END = 'ON_TURN_END',
+  /** 移動時 */
+  ON_MOVE = 'ON_MOVE',
+  /** 生命值低於閾值時 */
+  ON_HP_LOW = 'ON_HP_LOW',
+  /** 手動觸發（主動技能） */
+  MANUAL = 'MANUAL',
 }
 
 /**
  * 技能效果（單個效果）
  */
 export interface SkillEffect {
+  /** 技能效果類型）*/
   effectType: SkillEffectType;
-  value?: number; // 效果數值（加成、傷害、治療量等）
-  duration?: number; // 持續回合數（buff/debuff）
-  chance?: number; // 觸發機率（0-1）
-  targetType: TargetType; // 目標類型
-  range?: number; // 效果範圍
-  condition?: SkillCondition; // 觸發條件
+  /** 效果數值（加成、傷害、治療量等）*/
+  value?: number;
+  /** 持續回合數（buff/debuff）*/
+  duration?: number;
+  /** 觸發機率（0-1）*/
+  chance?: number;
+  /** 目標類型 */
+  targetType: TargetType;
+  /** 效果範圍 */
+  range?: number;
+  /** 觸發條件 */
+  condition?: SkillCondition;
 }
 
 /**
  * 技能條件
  */
 export interface SkillCondition {
-  minHpPercent?: number; // 最低 HP 百分比
-  maxHpPercent?: number; // 最高 HP 百分比
-  requiredTerrain?: string[]; // 需要的地形類型
-  requiredUnitType?: UnitType[]; // 需要的單位類型
-  minLevel?: number; // 最低等級
-  nearAllyCount?: number; // 附近友軍數量
-  nearEnemyCount?: number; // 附近敵人數量
+  /** 最低 HP 百分比 */
+  minHpPercent?: number;
+  /** 最高 HP 百分比 */
+  maxHpPercent?: number;
+  /** 需要的地形類型 */
+  requiredTerrain?: string[];
+  /** 需要的單位類型 */
+  requiredUnitType?: UnitType[];
+  /** 最低等級 */
+  minLevel?: number;
+  /** 附近友軍數量 */
+  nearAllyCount?: number;
+  /** 附近敵人數量 */
+  nearEnemyCount?: number;
 }
 
 /**
@@ -128,16 +152,19 @@ export interface Skill {
   description: string;
   type: SkillType;
 
-  // 技能效果列表（支持多個效果）
+  /** 技能效果列表（支持多個效果） */
   effects: SkillEffect[];
 
-  // 技能觸發時機
+  /** 技能觸發時機 */
   trigger: TriggerTiming;
 
   // 主動技能相關
-  cooldown?: number; // 冷卻回合數
-  currentCooldown?: number; // 當前冷卻
-  manaCost?: number; // 魔力消耗
+  /** 冷卻回合數 */
+  cooldown?: number;
+  /** 當前冷卻 */
+  currentCooldown?: number;
+  /** 魔力消耗 */
+  manaCost?: number;
 
   // 技能等級（未來擴展）
   level?: number;

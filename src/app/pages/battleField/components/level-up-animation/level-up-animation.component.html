@@ -1,0 +1,12 @@
+<div class="level-up-overlay" *ngIf="isVisible" @fadeInOut>
+  <div class="level-up-content" @scaleIn>
+    <div class="level-up-icon">⭐</div>
+    <div class="level-up-text">LEVEL UP!</div>
+    <div class="level-up-level">Lv.{{ level }}</div>
+    <div class="level-up-stats">
+      <div class="stat-increase">HP +{{ hpIncrease }}</div>
+      <div class="stat-increase">ATK +{{ atkIncrease }}</div>
+      <div class="stat-increase">DEF +{{ defIncrease }}</div>
+    </div>
+  </div>
+</div>

@@ -30,7 +30,7 @@ export interface GrowthRates {
   hp: number; // HP 成長
   attack: number; // 攻擊力成長
   defense: number; // 防禦力成長
-  mana: number; // 魔力成長
+  // mana: number; // 魔力成長
 }
 
 /**
@@ -43,6 +43,7 @@ export interface UnitStats {
   defense: number;
   move: number;
   range: number;
+  /** 魔力值 */
   mana?: number; // 魔力值（某些單位）
   maxMana?: number; // 最大魔力值
 }
@@ -51,11 +52,16 @@ export interface UnitStats {
  * 當前生效的 Buff/Debuff
  */
 export interface ActiveEffect {
+  /** 技能效果類型 */
   effectType: SkillEffectType;
+  /** 數值*/
   value: number;
-  duration: number; // 剩餘回合數
-  sourceSkillId: string; // 來源技能 ID
-  sourcUnitId: string; // 來源單位 ID
+  /** 剩餘回合數 */
+  duration: number;
+  /** 來源技能 ID */
+  sourceSkillId: string;
+  /** 來源單位 ID */
+  sourcUnitId: string;
 }
 
 /**
@@ -85,9 +91,10 @@ export interface Unit {
     hasMoved: boolean;
     hasAttacked: boolean;
     canAct: boolean;
-    isStunned?: boolean; // 是否被暈眩
+    /** 是否被暈眩 */
+    isStunned?: boolean;
   };
-
+  /** 單位特性*/
   characteristics?: {
     canFly?: boolean;
     ignoresTerrain?: boolean;

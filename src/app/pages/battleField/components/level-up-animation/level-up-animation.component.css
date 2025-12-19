@@ -1,0 +1,66 @@
+.level-up-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.level-up-content {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: 5px solid #ffa500;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
+}
+
+.level-up-icon {
+  font-size: 80px;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.level-up-text {
+  font-size: 48px;
+  font-weight: bold;
+  color: #d97706;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 20px 0;
+}
+
+.level-up-level {
+  font-size: 36px;
+  font-weight: bold;
+  color: #92400e;
+  margin-bottom: 20px;
+}
+
+.level-up-stats {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.stat-increase {
+  background: rgba(217, 119, 6, 0.3);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #92400e;
+}
