@@ -10,7 +10,7 @@
   <div class="hp-section">
     <div class="hp-label">
       <span>HP</span>
-      <span class="hp-value">{{ unit.hp }} / {{ unit.maxHp }}</span>
+      <span class="hp-value">{{ unit.stats.hp }} / {{ unit.stats.maxHp }}</span>
     </div>
     <div class="hp-bar-container">
       <div
@@ -26,25 +26,25 @@
     <div class="stat-item">
       <span class="stat-icon">⚔️</span>
       <span class="stat-label">攻擊</span>
-      <span class="stat-value">{{ unit.attack }}</span>
+      <span class="stat-value">{{ unit.stats.attack }}</span>
     </div>
 
     <div class="stat-item">
       <span class="stat-icon">🛡️</span>
       <span class="stat-label">防禦</span>
-      <span class="stat-value">{{ unit.defense }}</span>
+      <span class="stat-value">{{ unit.stats.defense }}</span>
     </div>
 
     <div class="stat-item">
       <span class="stat-icon">🚶</span>
       <span class="stat-label">移動</span>
-      <span class="stat-value">{{ unit.move }}</span>
+      <span class="stat-value">{{ unit.stats.move }}</span>
     </div>
 
     <div class="stat-item">
       <span class="stat-icon">🎯</span>
       <span class="stat-label">射程</span>
-      <span class="stat-value">{{ unit.range }}</span>
+      <span class="stat-value">{{ unit.stats.range }}</span>
     </div>
   </div>
 

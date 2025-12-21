@@ -107,22 +107,170 @@ export class CombatCalculator {
     const distance =
       Math.abs(attacker.x - defender.x) + Math.abs(attacker.y - defender.y);
 
-    // 不能攻擊己方單位
-    if (attacker.ownerId === defender.ownerId) return false;
+    // 不能攻擊己方單位（除非有治療技能）
+    if (attacker.ownerId === defender.ownerId) {
+      if (!attacker.characteristics?.canHeal) {
+        return false;
+      }
+    }
+    // 檢查射程（包含射程加成）
+    const rangeBoost = this.skillService.getPassiveEffect(
+      attacker,
+      SkillEffectType.RANGE_BOOST
+    );
 
-    return distance <= attacker.stats.range;
+    const effectiveRange = attacker.stats.range + Math.floor(rangeBoost);
+
+    return distance <= effectiveRange;
   }
 
   /**
-   * 計算攻擊命中率 (未來擴充用)
+   * 檢查是否可以治療
+   * @param healer 治療者
+   * @param target 目標
+   * @returns 是否能治療
+   */
+  public canHeal(healer: Unit, target: Unit): boolean {
+    if (!healer.characteristics?.canHeal) {
+      return false;
+    }
+
+    // 必須是友軍
+    if (healer.ownerId !== target.ownerId) {
+      return false;
+    }
+
+    // 目標必須受傷
+    if (target.stats.hp >= target.stats.maxHp) {
+      return false;
+    }
+
+    const distance =
+      Math.abs(healer.x - target.x) + Math.abs(healer.y - target.y);
+
+    // 檢查射程（包含射程加成）
+    const rangeBoost = this.skillService.getPassiveEffect(
+      healer,
+      SkillEffectType.RANGE_BOOST
+    );
+    const effectiveRange = healer.stats.range + Math.floor(rangeBoost);
+
+    return distance <= effectiveRange;
+  }
+
+  /**
+   * 檢查是否會觸發反擊
+   * @param attacker 攻擊者
+   * @param defender 防禦者
+   * @returns 是否能反擊
+   */
+  public shouldCounterAttack(attacker: Unit, defender: Unit): boolean {
+    // 檢查防禦者是否有反擊技能
+    if (
+      !this.skillService.hasEffect(defender, SkillEffectType.COUNTER_ATTACK)
+    ) {
+      return false;
+    }
+
+    // 只有近戰攻擊才能被反擊
+    const distance =
+      Math.abs(attacker.x - defender.x) + Math.abs(attacker.y - defender.y);
+
+    // 檢查反擊技能的範圍設定
+    const counterSkill = defender.skills.find((skill) =>
+      skill.effects.some((e) => e.effectType === SkillEffectType.COUNTER_ATTACK)
+    );
+
+    if (counterSkill) {
+      const counterEffect = counterSkill.effects.find(
+        (e) => e.effectType === SkillEffectType.COUNTER_ATTACK
+      );
+      const counterRange = counterEffect?.range || 1;
+      return distance <= counterRange;
+    }
+
+    return distance <= 1;
+  }
+
+  /**
+   * 檢查是否會先制攻擊
+   * @param unit 單位
+   * @returns 是否會先制攻擊
+   */
+  public hasFirstStrike(unit: Unit): boolean {
+    return this.skillService.hasEffect(unit, SkillEffectType.FIRST_STRIKE);
+  }
+
+  /**
+   * 檢查是否會連續攻擊
+   * @param unit 單位
+   * @returns 是否會連續攻擊
+   */
+  public hasDoubleAttack(unit: Unit): boolean {
+    return this.skillService.hasEffect(unit, SkillEffectType.DOUBLE_ATTACK);
+  }
+
+  /**
+   * 計算反傷傷害
+   * @param defender 防禦者
+   * @param incomingDamage 傷害值
+   * @returns 反傷傷害
+   */
+  public calculateReflectDamage(
+    defender: Unit,
+    incomingDamage: number
+  ): number {
+    const reflectRate = this.skillService.getPassiveEffect(
+      defender,
+      SkillEffectType.REFLECT_DAMAGE
+    );
+
+    if (reflectRate > 0) {
+      const reflectDamage = Math.floor(incomingDamage * reflectRate);
+      console.log(`⚡ ${defender.name} 反彈 ${reflectDamage} 傷害`);
+      return reflectDamage;
+    }
+
+    return 0;
+  }
+
+  /**
+   * 檢查是否閃避攻擊
+   * @param defender 防禦者
+   * @returns 是否閃避成功
+   */
+  public checkEvasion(defender: Unit): boolean {
+    const evasionRate = this.skillService.getPassiveEffect(
+      defender,
+      SkillEffectType.EVASION
+    );
+
+    if (evasionRate > 0 && Math.random() < evasionRate) {
+      console.log(`💨 ${defender.name} 閃避了攻擊！`);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 計算攻擊命中率
    * @param attacker 攻擊者
    * @param defender 防禦者
    * @returns 命中率
    */
   public calculateHitRate(attacker: Unit, defender: Unit): number {
     // 基礎命中率 100%
-    // 未來可以根據單位屬性、地形等調整
-    return 100;
+    let hitRate = 1.0;
+
+    // 扣除閃避率
+    const evasionRate = this.skillService.getPassiveEffect(
+      defender,
+      SkillEffectType.EVASION
+    );
+    hitRate -= evasionRate;
+
+    return Math.max(0, Math.min(1, hitRate)) * 100;
   }
 
   /**
@@ -132,11 +280,46 @@ export class CombatCalculator {
    * @returns 暴擊率
    */
   public calculateCritRate(attacker: Unit): number {
-    // 基礎暴擊率 0%
-    // 未來可以根據單位屬性調整
-    return this.skillService.getPassiveEffect(
-      attacker,
-      SkillEffectType.CRITICAL_HIT
+    let totalCritRate = 0;
+
+    attacker.skills.forEach((skill) => {
+      skill.effects.forEach((effect) => {
+        if (
+          effect.effectType === SkillEffectType.CRITICAL_HIT &&
+          effect.chance
+        ) {
+          totalCritRate += effect.chance;
+        }
+      });
+    });
+
+    return Math.min(1, totalCritRate) * 100;
+  }
+
+  /**
+   * 檢查是否免疫某種效果
+   * @param unit 單位
+   * @param effectType 效果類型
+   * @returns 是否免疫
+   */
+  public isImmuneToEffect(unit: Unit, effectType: SkillEffectType): boolean {
+    // 檢查是否有免疫技能
+    const hasImmunity = this.skillService.hasEffect(
+      unit,
+      SkillEffectType.IMMUNITY
     );
+
+    if (hasImmunity) {
+      // TODO 可以擴展為檢查特定效果的免疫
+      const immuneEffects = [
+        SkillEffectType.STUN,
+        SkillEffectType.SLOW,
+        SkillEffectType.POISON,
+        SkillEffectType.BURN,
+      ];
+      return immuneEffects.includes(effectType);
+    }
+
+    return false;
   }
 }

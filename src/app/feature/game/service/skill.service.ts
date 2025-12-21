@@ -395,7 +395,7 @@ export class SkillService {
   /**
    * 獲取技能描述
    */
-  public getSkillDescription(unit: Unit): string[] {
+  public getSkillDescriptions(unit: Unit): string[] {
     return unit.skills.map((skill) => {
       let desc = `${skill.name}: ${skill.description}`;
 

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Unit } from '../model/unit.model';
+import { Unit, UnitType } from '../model/unit.model';
 import { Player } from '../model/player.model';
 import { GameState } from '../model/game-state.model';
 import { getTerrainConfig } from '../config/terrain.config';
 import { TerrainType, Tile } from '../model/tile.model';
+import { getExpToNextLevel, getUnitConfig } from '../config/unit.config';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateFactory {
@@ -34,44 +35,81 @@ export class GameStateFactory {
       turn: 0,
     };
   }
+  /**
+   * 從配置創建單位
+   */
+  public createUnitFromConfig(
+    id: string,
+    type: UnitType,
+    ownerId: string,
+    x: number,
+    y: number,
+    level: number = 1
+  ): Unit {
+    const config = getUnitConfig(type);
+
+    // 深拷貝技能（避免共享引用）
+    const skills = config.skills.map((skill) => ({ ...skill }));
+
+    const unit: Unit = {
+      id,
+      name: config.name,
+      type: config.type,
+      ownerId,
+      x,
+      y,
+      stats: { ...config.baseStats },
+      levelInfo: {
+        level,
+        exp: 0,
+        expToNext: getExpToNextLevel(level),
+        maxLevel: 20,
+      },
+      growthRates: { ...config.growthRates },
+      skills,
+      alive: true,
+      actionState: {
+        hasMoved: false,
+        hasAttacked: false,
+        canAct: true,
+      },
+      characteristics: config.characteristics
+        ? { ...config.characteristics }
+        : undefined,
+      activeEffects: [],
+    };
+
+    // 如果不是 1 級，應用成長
+    if (level > 1) {
+      this.applyLevelGrowth(unit, level);
+    }
+
+    return unit;
+  }
+
+  /**
+   * 應用等級成長
+   */
+  private applyLevelGrowth(unit: Unit, targetLevel: number): void {
+    const levelsToGrow = targetLevel - 1;
+
+    unit.stats.maxHp += unit.growthRates.hp * levelsToGrow;
+    unit.stats.hp = unit.stats.maxHp;
+    unit.stats.attack += unit.growthRates.attack * levelsToGrow;
+    unit.stats.defense += unit.growthRates.defense * levelsToGrow;
+  }
 
   /**
    * 建立預設單位
    */
   public createDefaultUnits(): Unit[] {
     return [
-      {
-        id: 'u1',
-        name: '劍士',
-        type: 'soldier',
-        ownerId: 'p1',
-        x: 1,
-        y: 1,
-        hp: 10,
-        maxHp: 10,
-        attack: 3,
-        defense: 2,
-        move: 3,
-        range: 1,
-        alive: true,
-        actionState: { hasMoved: false, hasAttacked: false, canAct: true },
-      },
-      {
-        id: 'u2',
-        name: '弓兵',
-        type: 'archer',
-        ownerId: 'p2',
-        x: 6,
-        y: 4,
-        hp: 8,
-        maxHp: 8,
-        attack: 2,
-        defense: 1,
-        move: 2,
-        range: 2,
-        alive: true,
-        actionState: { hasMoved: false, hasAttacked: false, canAct: true },
-      },
+      this.createUnitFromConfig('u1', UnitType.SOLDIER, 'P1', 1, 1, 1),
+      this.createUnitFromConfig('u2', UnitType.ARCHER, 'P1', 2, 2, 1),
+      this.createUnitFromConfig('u3', UnitType.KNIGHT, 'P1', 0, 2, 1),
+      this.createUnitFromConfig('e1', UnitType.SOLDIER, 'P2', 6, 4, 1),
+      this.createUnitFromConfig('e2', UnitType.ARCHER, 'P2', 7, 4, 1),
+      this.createUnitFromConfig('e3', UnitType.MAGE, 'P2', 5, 5, 1),
     ];
   }
   /**
@@ -139,10 +177,25 @@ export class GameStateFactory {
   public createGameFromConfig(config: any): GameState {
     const width = config.width || 8;
     const height = config.height || 8;
-    const units = config.units || this.createDefaultUnits();
     const players = config.players || this.createDefaultPlayers();
     const tiles = config.tiles || this.createDefaultTerrain(width, height);
-
+    // 從配置創建單位
+    const units: Unit[] = [];
+    if (config.units && Array.isArray(config.units)) {
+      config.units.forEach((unitConfig: any) => {
+        const unit = this.createUnitFromConfig(
+          unitConfig.id,
+          unitConfig.type,
+          unitConfig.ownerId,
+          unitConfig.x,
+          unitConfig.y,
+          unitConfig.level || 1
+        );
+        units.push(unit);
+      });
+    } else {
+      units.push(...this.createDefaultUnits());
+    }
     return this.createNewGame(width, height, units, players, tiles);
   }
 
