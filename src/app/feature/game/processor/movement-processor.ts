@@ -44,7 +44,8 @@ export class MovementProcessor {
     }
     // 5.距離檢查
     const distance = this.dist({ x: unit.x, y: unit.y }, { x, y });
-    if (distance > unit.move) return { success: false, message: 'too far' };
+    if (distance > unit.stats.move)
+      return { success: false, message: 'too far' };
 
     // 6.格子是否被佔領檢查
     const occupied = state.units.find(

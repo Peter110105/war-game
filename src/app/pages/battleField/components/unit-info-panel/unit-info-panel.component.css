@@ -1,7 +1,7 @@
 .unit-info-panel {
-  flex: 1;/* 填滿剩餘空間 */
+  flex: 1;
   margin: 12px;
-  width: 220px;
+  width: 280px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: 3px solid #fff;
   border-radius: 12px;
@@ -9,6 +9,20 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   color: white;
   animation: slideInLeft 0.3s ease-out;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* 標題區 */
@@ -18,10 +32,25 @@
   border-bottom: 2px solid rgba(255, 255, 255, 0.3);
 }
 
+.unit-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 .unit-name {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 4px;
+}
+
+.unit-level {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
 }
 
 .unit-type {
@@ -32,14 +61,14 @@
 
 /* HP 區 */
 .hp-section {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .hp-label {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   font-weight: bold;
 }
 
@@ -59,6 +88,70 @@
   height: 100%;
   transition: width 0.3s ease, background-color 0.3s ease;
   border-radius: 6px;
+}
+
+/* MP 魔力區 */
+.mana-section {
+  margin-bottom: 8px;
+}
+
+.mana-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.mana-value {
+  color: #87ceeb;
+}
+
+.mana-bar-container {
+  height: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(135, 206, 235, 0.5);
+}
+
+.mana-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4fc3f7 0%, #87ceeb 100%);
+  transition: width 0.3s ease;
+  border-radius: 5px;
+}
+
+/* EXP 經驗區 */
+.exp-section {
+  margin-bottom: 12px;
+}
+
+.exp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+  opacity: 0.9;
+}
+
+.exp-value {
+  color: #98fb98;
+}
+
+.exp-bar-container {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(152, 251, 152, 0.5);
+}
+
+.exp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #98fb98 0%, #00ff7f 100%);
+  transition: width 0.3s ease;
+  border-radius: 4px;
 }
 
 /* 屬性區 */
@@ -91,6 +184,222 @@
   font-weight: bold;
   font-size: 14px;
   color: #ffd700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-base {
+  font-size: 11px;
+  color: #ffec8b;
+  opacity: 0.7;
+  font-weight: normal;
+}
+
+/* 暴擊率區 */
+.crit-rate-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 0, 0, 0.2);
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.crit-icon {
+  font-size: 16px;
+}
+
+.crit-label {
+  flex: 1;
+  font-weight: bold;
+}
+
+.crit-value {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+/* 當前效果區 */
+.active-effects-section {
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.effects-header {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #ffd700;
+}
+
+.effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.effect-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.effect-text {
+  flex: 1;
+}
+
+/* 技能區 */
+.skills-section {
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.skills-header {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #ffd700;
+}
+
+.skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skill-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.skill-item.passive {
+  border-left-color: #4fc3f7;
+}
+
+.skill-item.active {
+  border-left-color: #ff9800;
+}
+
+.skill-item.on-cooldown {
+  opacity: 0.6;
+}
+
+.skill-header-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.skill-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.skill-info {
+  flex: 1;
+  font-size: 11px;
+}
+
+.skill-name-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.skill-name {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.skill-badge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: normal;
+}
+
+.passive-badge {
+  background: rgba(79, 195, 247, 0.4);
+  color: #87ceeb;
+}
+
+.active-badge {
+  background: rgba(255, 152, 0, 0.4);
+  color: #ffb74d;
+}
+
+.multi-effect-badge {
+  background: rgba(255, 215, 0, 0.3);
+  color: #ffd700;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.skill-desc {
+  opacity: 0.9;
+  line-height: 1.4;
+  color: #e0e0e0;
+}
+
+.skill-status-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 10px;
+}
+
+.skill-cooldown {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+.skill-cost {
+  color: #87ceeb;
+  font-weight: bold;
+}
+
+/* 多效果詳細顯示 */
+.skill-effects-detail {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  flex-wrap: wrap;
+}
+
+.effect-badge {
+  font-size: 14px;
+  padding: 2px 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  cursor: help;
+  transition: all 0.2s;
+}
+
+.effect-badge:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
 }
 
 /* 狀態區 */
@@ -110,7 +419,6 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: bold;
-  background: #00ff00;
   color: white;
 }
 
@@ -146,4 +454,23 @@
 
 .icon-label {
   font-size: 10px;
+}
+
+/* 捲軸樣式 */
+.unit-info-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.unit-info-panel::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.unit-info-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.unit-info-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }

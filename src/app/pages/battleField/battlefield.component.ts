@@ -23,6 +23,7 @@ import {
 import { UnitInfoPanelComponent } from './components/unit-info-panel/unit-info-panel.component';
 import { GameResultModalComponent } from './components/game-result-modal/game-result-modal.component';
 import { VictoryService } from '../../feature/game/service/victory.service';
+import { SkillService } from '../../feature/game/service/skill.service';
 
 @Component({
   selector: 'app-battlefield',
@@ -60,7 +61,8 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
     private gameService: GameStateService,
     private eventService: GameEventService,
     private pathfindingService: PathfindingService,
-    private victoryServiec: VictoryService
+    private victoryService: VictoryService,
+    private skillService: SkillService
   ) {}
 
   get currentPlayer() {
@@ -172,6 +174,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
       gameService: this.gameService,
       eventService: this.eventService,
       pathfindingService: this.pathfindingService,
+      skillService: this.skillService,
     });
   }
 
@@ -208,10 +211,45 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
 
         case GameEventType.UNIT_ATTACKED:
           console.log('Unit attacked:', event.data);
+          // 顯示戰鬥結果訊息
+          if (event.data.isCritical) {
+            console.log('💥 暴擊！');
+          }
+          if (event.data.evaded) {
+            console.log('💨 閃避！');
+          }
+          if (event.data.isCounterAttack) {
+            console.log('↩️ 反擊！');
+          }
+          if (event.data.reflectDamage && event.data.reflectDamage > 0) {
+            console.log(`⚡ 反傷 ${event.data.reflectDamage} 點傷害！`);
+          }
+          if (
+            event.data.attackerLifeSteal &&
+            event.data.attackerLifeSteal > 0
+          ) {
+            console.log(`🩸 吸血 ${event.data.attackerLifeSteal} HP！`);
+          }
+
           this.showActionMenu = false;
           this.selectedUnit = null;
           this.hoveredUnit = null;
           this.currentMode = 'idle';
+          break;
+        case GameEventType.UNIT_HEALED:
+          console.log('Unit healed:', event.data);
+          break;
+
+        case GameEventType.UNIT_LEVEL_UP:
+          console.log('🎉 Unit leveled up:', event.data);
+          const leveledUnit = this.gameService.getUnitById(event.data.unitId);
+          if (leveledUnit) {
+            console.log(`${leveledUnit.name} 升級到 Lv.${event.data.level}！`);
+          }
+          break;
+
+        case GameEventType.SKILL_USED:
+          console.log('✨ Skill used:', event.data);
           break;
 
         case GameEventType.TURN_ENDED:
@@ -233,7 +271,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
    * 檢查遊戲是否結束
    */
   private checkGameOver(): void {
-    const result = this.victoryServiec.checkVictory(
+    const result = this.victoryService.checkVictory(
       this.gameService.getGameState()
     );
 

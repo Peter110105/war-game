@@ -13,7 +13,9 @@ import { InputManager } from '../manager/input.manager';
 import { HpBarManager } from '../manager/hp-bar.manager';
 import { Unit } from '../../model/unit.model';
 import { TerrainRendererManager } from '../manager/terrain-renderer.manager';
-
+import { SkillEffectType } from '../../model/skill.model';
+import { SkillService } from '../../service/skill.service';
+import { EffectRendererManager } from '../manager/effect-renderer.manager';
 /**
  * 遊戲場景(協調者)
  */
@@ -22,6 +24,7 @@ export class BattlefieldScene extends Phaser.Scene {
   private gameService!: GameStateService;
   private eventService!: GameEventService;
   private pathfindingService!: PathfindingService;
+  private skillService!: SkillService;
 
   // Manger
   private unitRenderer!: UnitRendererManager;
@@ -29,6 +32,7 @@ export class BattlefieldScene extends Phaser.Scene {
   private inputMgr!: InputManager;
   private hpBarMgr!: HpBarManager;
   private terrainRenderer!: TerrainRendererManager;
+  private effectRenderer!: EffectRendererManager;
 
   // 狀態
   private selectedUnitId: string | null = null;
@@ -45,10 +49,12 @@ export class BattlefieldScene extends Phaser.Scene {
     gameService: GameStateService;
     eventService: GameEventService;
     pathfindingService: PathfindingService;
+    skillService: SkillService;
   }) {
     this.gameService = data.gameService;
     this.eventService = data.eventService;
     this.pathfindingService = data.pathfindingService;
+    this.skillService = data.skillService;
   }
 
   create() {
@@ -58,6 +64,7 @@ export class BattlefieldScene extends Phaser.Scene {
     this.inputMgr = new InputManager(this);
     this.hpBarMgr = new HpBarManager(this);
     this.terrainRenderer = new TerrainRendererManager(this);
+    this.effectRenderer = new EffectRendererManager(this);
 
     // 繪製地圖和單位
     this.drawTerrain();
@@ -107,23 +114,58 @@ export class BattlefieldScene extends Phaser.Scene {
           if (unit) {
             console.log('移動血條');
             this.hpBarMgr.moveHpBar(unit);
+            this.effectRenderer.moveEffectIcons(unit);
           }
           break;
         case GameEventType.UNIT_ATTACKED:
-          // 攻擊後更新血條
           const defender = this.gameService.getUnitById(event.data.defenderId);
-          console.log('更新血條');
           if (defender) {
             this.hpBarMgr.updateHpBar(defender);
+            // 顯示傷害數字
+            if (event.data.defenderDamage) {
+              this.showDamageNumber(
+                defender.x,
+                defender.y,
+                event.data.defenderDamage,
+                event.data.isCritical
+              );
+            }
+            // 顯示特殊效果
+            if (event.data.isCritical) {
+              this.showCriticalEffect(defender.x, defender.y);
+            }
+            if (event.data.evaded) {
+              this.showEvadeEffect(defender.x, defender.y);
+            }
+            if (event.data.reflectDamage && event.data.reflectDamage > 0) {
+              const attacker = this.gameService.getUnitById(event.data.unitId);
+              if (attacker) {
+                this.showDamageNumber(
+                  attacker.x,
+                  attacker.y,
+                  event.data.reflectDamage,
+                  false
+                );
+              }
+            }
           }
           break;
         case GameEventType.UNIT_DIED:
           this.handleUnitDeath(event.data.unitId);
           break;
+        case GameEventType.UNIT_LEVEL_UP:
+          this.showLevelUpEffect(event.data.unitId);
+          break;
+        case GameEventType.SKILL_USED:
+          this.showSkillEffect(event.data.unitId, event.data.skillId);
+          break;
         case GameEventType.TURN_ENDED:
           this.selectedUnitId = null;
           this.clearMovableArea();
           this.clearAttackableArea();
+
+          // 更新所有單位的效果圖示
+          this.updateAllEffectIcons();
           break;
         case GameEventType.PLAYER_ACTION_MOVED:
           this.currentMode = 'move';
@@ -154,6 +196,7 @@ export class BattlefieldScene extends Phaser.Scene {
     // 為每個單位創建血條
     gameState.units.forEach((unit) => {
       this.hpBarMgr.createHpBar(unit);
+      this.effectRenderer.updateEffectIcons(unit);
     });
   }
 
@@ -167,11 +210,36 @@ export class BattlefieldScene extends Phaser.Scene {
           fontSize: GAME_CONFIG.TEXT.FONT_SIZE,
           color: GAME_CONFIG.TEXT.COLOR,
           backgroundColor: GAME_CONFIG.TEXT.BACKGROUND,
+          padding: { x: 8, y: 6 },
+        });
+        this.unitTooltip.setDepth(1000);
+      }
+      // 計算增強後的屬性
+      const enhancedAttack = this.skillService.getEnhancedAttack(unit);
+      const enhancedDefense = this.skillService.getEnhancedDefense(unit);
+
+      // 構建提示文字
+      let tooltipText = `${unit.name} Lv.${unit.levelInfo.level}\n`;
+      tooltipText += `HP: ${unit.stats.hp}/${unit.stats.maxHp}\n`;
+      tooltipText += `攻擊: ${enhancedAttack}`;
+      if (enhancedAttack !== unit.stats.attack) {
+        tooltipText += ` (${unit.stats.attack})`;
+      }
+      tooltipText += `\n防禦: ${enhancedDefense}`;
+      if (enhancedDefense !== unit.stats.defense) {
+        tooltipText += ` (${unit.stats.defense})`;
+      }
+
+      // 顯示當前效果
+      if (unit.activeEffects.length > 0) {
+        tooltipText += '\n---';
+        const effectDescriptions =
+          this.skillService.getActiveEffectsDescription(unit);
+        effectDescriptions.forEach((desc) => {
+          tooltipText += `\n${desc}`;
         });
       }
-      this.unitTooltip.setText(
-        `名稱: ${unit.name}\nHP: ${unit.hp}/${unit.maxHp}\n攻擊: ${unit.attack}\n防禦: ${unit.defense}`
-      );
+
       this.unitTooltip.setPosition(
         x * GAME_CONFIG.TILE_SIZE + 10,
         y * GAME_CONFIG.TILE_SIZE + 10
@@ -245,6 +313,10 @@ export class BattlefieldScene extends Phaser.Scene {
             console.log('該單位本回合已行動過');
             return;
           }
+          if (clickedUnit.actionState.isStunned) {
+            console.log('該單位被暈眩，無法行動');
+            return;
+          }
           this.selectedUnitId = clickedUnit.id;
           this.showMovableArea(clickedUnit.id);
           this.showAttackableArea(clickedUnit.id);
@@ -291,7 +363,7 @@ export class BattlefieldScene extends Phaser.Scene {
       this.gameService.getGameState(),
       { x: selectedUnit.x, y: selectedUnit.y },
       { x: targetX, y: targetY },
-      selectedUnit.move
+      selectedUnit.id
     );
     if (!path || path.length === 0) {
       console.log('無法到達');
@@ -373,6 +445,7 @@ export class BattlefieldScene extends Phaser.Scene {
       this.animationMgr.playDeathAnimation(sprite, () => {
         this.unitRenderer.removeUnit(unitId);
         this.hpBarMgr.removeHpBar(unitId);
+        this.effectRenderer.removeEffectIcons(unitId);
       });
     }
   }
@@ -403,12 +476,14 @@ export class BattlefieldScene extends Phaser.Scene {
       );
     });
   }
+
   // 清除可移動範圍顯示
   private clearMovableArea() {
     this.movableAreaGraphics?.clear();
     this.movableAreaGraphics?.destroy();
     this.movableAreaGraphics = undefined;
   }
+
   // 顯示可攻擊範圍
   private showAttackableArea(unitId: string) {
     // 清除舊有的可攻擊範圍
@@ -433,10 +508,177 @@ export class BattlefieldScene extends Phaser.Scene {
       );
     });
   }
+
   // 清除可攻擊範圍顯示
   private clearAttackableArea() {
     this.attackableAreaGraphics?.clear();
     this.attackableAreaGraphics?.destroy();
     this.attackableAreaGraphics = undefined;
+  }
+  // ===== 視覺效果方法 =====
+
+  private showDamageNumber(
+    x: number,
+    y: number,
+    damage: number,
+    isCritical: boolean
+  ) {
+    const pixelX = x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+    const pixelY = y * GAME_CONFIG.TILE_SIZE;
+
+    const text = this.add.text(pixelX, pixelY, `-${damage}`, {
+      fontSize: isCritical ? '32px' : '24px',
+      color: isCritical ? '#ff0000' : '#ff6b6b',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 4,
+    });
+    text.setOrigin(0.5);
+    text.setDepth(1000);
+
+    this.tweens.add({
+      targets: text,
+      y: pixelY - 50,
+      alpha: 0,
+      duration: 1000,
+      ease: 'Power2',
+      onComplete: () => text.destroy(),
+    });
+  }
+
+  private showHealNumber(x: number, y: number, amount: number) {
+    const pixelX = x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+    const pixelY = y * GAME_CONFIG.TILE_SIZE;
+
+    const text = this.add.text(pixelX, pixelY, `+${amount}`, {
+      fontSize: '24px',
+      color: '#00ff00',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 4,
+    });
+    text.setOrigin(0.5);
+    text.setDepth(1000);
+
+    this.tweens.add({
+      targets: text,
+      y: pixelY - 50,
+      alpha: 0,
+      duration: 1000,
+      ease: 'Power2',
+      onComplete: () => text.destroy(),
+    });
+  }
+
+  private showCriticalEffect(x: number, y: number) {
+    const pixelX = x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+    const pixelY = y * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+
+    const circle = this.add.circle(pixelX, pixelY, 5, 0xff0000);
+    circle.setDepth(999);
+
+    this.tweens.add({
+      targets: circle,
+      radius: 40,
+      alpha: 0,
+      duration: 500,
+      ease: 'Power2',
+      onComplete: () => circle.destroy(),
+    });
+  }
+
+  private showEvadeEffect(x: number, y: number) {
+    const pixelX = x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+    const pixelY = y * GAME_CONFIG.TILE_SIZE;
+
+    const text = this.add.text(pixelX, pixelY, 'MISS!', {
+      fontSize: '20px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 4,
+    });
+    text.setOrigin(0.5);
+    text.setDepth(1000);
+
+    this.tweens.add({
+      targets: text,
+      y: pixelY - 40,
+      alpha: 0,
+      duration: 800,
+      ease: 'Power2',
+      onComplete: () => text.destroy(),
+    });
+  }
+
+  private showLevelUpEffect(unitId: string) {
+    const unit = this.gameService.getUnitById(unitId);
+    if (!unit) return;
+
+    const pixelX = unit.x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+    const pixelY = unit.y * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+
+    // 發光效果
+    const circle = this.add.circle(pixelX, pixelY, 10, 0xffd700);
+    circle.setDepth(999);
+
+    this.tweens.add({
+      targets: circle,
+      radius: 50,
+      alpha: 0,
+      duration: 1000,
+      ease: 'Power2',
+      onComplete: () => circle.destroy(),
+    });
+
+    // LEVEL UP 文字
+    const text = this.add.text(pixelX, pixelY - 30, 'LEVEL UP!', {
+      fontSize: '20px',
+      color: '#ffd700',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 4,
+    });
+    text.setOrigin(0.5);
+    text.setDepth(1000);
+
+    this.tweens.add({
+      targets: text,
+      y: pixelY - 60,
+      alpha: 0,
+      duration: 1500,
+      ease: 'Power2',
+      onComplete: () => text.destroy(),
+    });
+  }
+
+  private showSkillEffect(unitId: string, skillId: string) {
+    const unit = this.gameService.getUnitById(unitId);
+    if (!unit) return;
+
+    const pixelX = unit.x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+    const pixelY = unit.y * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
+
+    // 技能特效圓圈
+    const circle = this.add.circle(pixelX, pixelY, 5, 0x87ceeb);
+    circle.setDepth(999);
+
+    this.tweens.add({
+      targets: circle,
+      radius: 35,
+      alpha: 0,
+      duration: 600,
+      ease: 'Power2',
+      onComplete: () => circle.destroy(),
+    });
+  }
+
+  private updateAllEffectIcons() {
+    const gameState = this.gameService.getGameState();
+    gameState.units.forEach((unit) => {
+      if (unit.alive) {
+        this.effectRenderer.updateEffectIcons(unit);
+      }
+    });
   }
 }

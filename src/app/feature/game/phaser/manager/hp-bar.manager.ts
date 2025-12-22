@@ -44,10 +44,11 @@ export class HpBarManager {
    * @param unit 單位
    */
   private drawHpBar(unit: Unit): void {
+    console.log('drawHpBar', unit);
     const data = this.hpBars.get(unit.id);
     if (!data) return;
 
-    const hpRatio = unit.hp / unit.maxHp;
+    const hpRatio = unit.stats.hp / unit.stats.maxHp;
     const currentWidth = data.width * hpRatio;
 
     // 清除舊的
