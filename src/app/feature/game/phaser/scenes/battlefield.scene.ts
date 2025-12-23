@@ -1,23 +1,25 @@
 import Phaser from 'phaser';
-import { GameCommand } from '../../command/command.interface';
 import { GameStateService } from '../../state/game-state.service';
-import {
-  GameEventService,
-  GameEventType,
-} from '../../state/game-event.service';
+import { GameEventService } from '../../state/game-event.service';
 import { PathfindingService } from '../../movement/path-finding.service';
 import { GAME_CONFIG } from '../../config/game/game.config';
 import { UnitRendererManager } from '../managers/rendering/unit-renderer.manager';
 import { AnimationManager } from '../managers/animation.manager';
 import { InputManager } from '../managers/input.manager';
 import { HpBarManager } from '../managers/rendering/hp-bar.manager';
-import { Unit } from '../../model/unit.model';
 import { TerrainRendererManager } from '../managers/rendering/terrain-renderer.manager';
-import { SkillEffectType } from '../../model/skill.model';
 import { SkillService } from '../../skill/skill.service';
 import { EffectRendererManager } from '../managers/rendering/effect-renderer.manager';
+import { SceneEventHandler } from './handlers/scene-event.handler';
+import { SceneInputHandler } from './handlers/scene-input.handler';
+import { SceneVisualHandler } from './handlers/scene-visual.handler';
+
 /**
- * 遊戲場景(協調者)
+ * 戰場場景 (簡化後的協調者)
+ * 職責：
+ * 1. 初始化場景和管理器
+ * 2. 協調各個 Handler
+ * 3. 繪製基礎地圖網格
  */
 export class BattlefieldScene extends Phaser.Scene {
   // service
@@ -34,17 +36,19 @@ export class BattlefieldScene extends Phaser.Scene {
   private terrainRenderer!: TerrainRendererManager;
   private effectRenderer!: EffectRendererManager;
 
-  // 狀態
-  private selectedUnitId: string | null = null;
-  private currentMode: 'idle' | 'move' | 'attack' = 'idle'; // 模式
-  private movableAreaGraphics?: Phaser.GameObjects.Graphics; // 可移動範圍圖形
-  private attackableAreaGraphics?: Phaser.GameObjects.Graphics; // 可攻擊範圍圖形
-  private unitTooltip?: Phaser.GameObjects.Text; // 單位提示文字
-  private terrainTooltip?: Phaser.GameObjects.Text; // 地形提示文字
+  // Handlers
+  private eventHandler!: SceneEventHandler;
+  private inputHandler!: SceneInputHandler;
+  private visualHandler!: SceneVisualHandler;
 
   constructor() {
     super('BattlefieldScene');
   }
+
+  /**
+   * 初始化 (接收依賴注入的服務)
+   */
+
   init(data: {
     gameService: GameStateService;
     eventService: GameEventService;
@@ -57,39 +61,81 @@ export class BattlefieldScene extends Phaser.Scene {
     this.skillService = data.skillService;
   }
 
+  /**
+   * 創建場景
+   */
   create() {
-    // 初始化 Manager
+    this.initializeManagers();
+    this.initializeHandlers();
+    this.setupScene();
+    this.setupInputHandling();
+  }
+
+  /**
+   * 初始化所有管理器
+   */
+  private initializeManagers(): void {
     this.unitRenderer = new UnitRendererManager(this);
     this.animationMgr = new AnimationManager(this);
     this.inputMgr = new InputManager(this);
     this.hpBarMgr = new HpBarManager(this);
     this.terrainRenderer = new TerrainRendererManager(this);
     this.effectRenderer = new EffectRendererManager(this);
+  }
 
-    // 繪製地圖和單位
-    this.drawTerrain();
+  /**
+   * 初始化所有處理器
+   */
+  private initializeHandlers(): void {
+    // 事件處理器
+    this.eventHandler = new SceneEventHandler(
+      this,
+      this.eventService,
+      this.gameService,
+      this.unitRenderer,
+      this.hpBarMgr,
+      this.effectRenderer
+    );
+
+    // 輸入處理器
+    this.inputHandler = new SceneInputHandler(
+      this,
+      this.gameService,
+      this.eventService,
+      this.pathfindingService,
+      this.skillService,
+      this.unitRenderer,
+      this.animationMgr,
+      this.inputMgr,
+      this.terrainRenderer
+    );
+
+    // 視覺效果處理器
+    this.visualHandler = new SceneVisualHandler(this, this.gameService);
+  }
+
+  /**
+   * 設置場景 (繪製初始畫面)
+   */
+  private setupScene(): void {
     this.drawMap();
+    this.drawTerrain();
     this.drawUnitsWithHpBars();
 
-    // 訂閱事件
-    this.subscribeToEvents();
-
-    // 設置輸入
-    this.inputMgr.onPointerDown((x, y) => {
-      this.handleClick(x, y);
-    });
-    this.inputMgr.onPointerMove((x, y) => {
-      this.showUnitTooltip(x, y);
-      this.showTerrainTooltip(x, y);
-    });
-  }
-  /** 繪製地形*/
-  private drawTerrain() {
-    const gameState = this.gameService.getGameState();
-    this.terrainRenderer.drawTerrain(gameState);
+    // 訂閱遊戲事件
+    this.eventHandler.subscribeToEvents();
   }
 
-  /** 繪製地圖網格 */
+  /**
+   * 設置輸入處理
+   */
+  private setupInputHandling(): void {
+    this.inputHandler.setupInputListeners();
+  }
+
+  /**
+   * 繪製地圖網格
+   */
   private drawMap() {
     const g = this.add.graphics();
     g.lineStyle(1, GAME_CONFIG.LINE_STYLE.COLOR);
@@ -106,89 +152,17 @@ export class BattlefieldScene extends Phaser.Scene {
     }
   }
 
-  private subscribeToEvents() {
-    this.eventService.events$.subscribe((event) => {
-      switch (event.type) {
-        case GameEventType.UNIT_MOVED:
-          const unit = this.gameService.getUnitById(event.data.unitId);
-          if (unit) {
-            console.log('移動血條');
-            this.hpBarMgr.moveHpBar(unit);
-            this.effectRenderer.moveEffectIcons(unit);
-          }
-          break;
-        case GameEventType.UNIT_ATTACKED:
-          const defender = this.gameService.getUnitById(event.data.defenderId);
-          if (defender) {
-            this.hpBarMgr.updateHpBar(defender);
-            // 顯示傷害數字
-            if (event.data.defenderDamage) {
-              this.showDamageNumber(
-                defender.x,
-                defender.y,
-                event.data.defenderDamage,
-                event.data.isCritical
-              );
-            }
-            // 顯示特殊效果
-            if (event.data.isCritical) {
-              this.showCriticalEffect(defender.x, defender.y);
-            }
-            if (event.data.evaded) {
-              this.showEvadeEffect(defender.x, defender.y);
-            }
-            if (event.data.reflectDamage && event.data.reflectDamage > 0) {
-              const attacker = this.gameService.getUnitById(event.data.unitId);
-              if (attacker) {
-                this.showDamageNumber(
-                  attacker.x,
-                  attacker.y,
-                  event.data.reflectDamage,
-                  false
-                );
-              }
-            }
-          }
-          break;
-        case GameEventType.UNIT_DIED:
-          this.handleUnitDeath(event.data.unitId);
-          break;
-        case GameEventType.UNIT_LEVEL_UP:
-          this.showLevelUpEffect(event.data.unitId);
-          break;
-        case GameEventType.SKILL_USED:
-          this.showSkillEffect(event.data.unitId, event.data.skillId);
-          break;
-        case GameEventType.TURN_ENDED:
-          this.selectedUnitId = null;
-          this.clearMovableArea();
-          this.clearAttackableArea();
-
-          // 更新所有單位的效果圖示
-          this.updateAllEffectIcons();
-          break;
-        case GameEventType.PLAYER_ACTION_MOVED:
-          this.currentMode = 'move';
-          this.showMovableArea(event.data.unitId);
-          this.clearAttackableArea(); // 清除可攻擊範圍顯示
-          break;
-        case GameEventType.PLAYER_ACTION_ATTACKED:
-          this.currentMode = 'attack';
-          this.showAttackableArea(event.data.unitId);
-          this.clearMovableArea(); // 清除可移動範圍顯示
-          break;
-        case GameEventType.PLAYER_ACTION_WAIT:
-        case GameEventType.PLAYER_ACTION_CANCELLED:
-          this.currentMode = 'idle';
-          this.selectedUnitId = null;
-          this.clearMovableArea(); // 清除可移動範圍顯示
-          this.clearAttackableArea(); // 清除可攻擊範圍顯示
-          break;
-      }
-    });
+  /**
+   * 繪製地形
+   */
+  private drawTerrain() {
+    const gameState = this.gameService.getGameState();
+    this.terrainRenderer.drawTerrain(gameState);
   }
 
-  /**  繪製單位和血條 */
+  /**
+   * 繪製單位和血條
+   */
   private drawUnitsWithHpBars() {
     const gameState = this.gameService.getGameState();
     this.unitRenderer.drawUnits(gameState);
@@ -200,485 +174,10 @@ export class BattlefieldScene extends Phaser.Scene {
     });
   }
 
-  /**  顯示單位提示文字 */
-  private showUnitTooltip(x: number, y: number) {
-    const unit = this.gameService.getUnitAt(x, y);
-    if (unit) {
-      if (!this.unitTooltip) {
-        this.unitTooltip = this.add.text(0, 0, '', {
-          font: GAME_CONFIG.TEXT.FONT_FAMILY,
-          fontSize: GAME_CONFIG.TEXT.FONT_SIZE,
-          color: GAME_CONFIG.TEXT.COLOR,
-          backgroundColor: GAME_CONFIG.TEXT.BACKGROUND,
-          padding: { x: 8, y: 6 },
-        });
-        this.unitTooltip.setDepth(1000);
-      }
-      // 計算增強後的屬性
-      const enhancedAttack = this.skillService.getEnhancedAttack(unit);
-      const enhancedDefense = this.skillService.getEnhancedDefense(unit);
-
-      // 構建提示文字
-      let tooltipText = `${unit.name} Lv.${unit.levelInfo.level}\n`;
-      tooltipText += `HP: ${unit.stats.hp}/${unit.stats.maxHp}\n`;
-      tooltipText += `攻擊: ${enhancedAttack}`;
-      if (enhancedAttack !== unit.stats.attack) {
-        tooltipText += ` (${unit.stats.attack})`;
-      }
-      tooltipText += `\n防禦: ${enhancedDefense}`;
-      if (enhancedDefense !== unit.stats.defense) {
-        tooltipText += ` (${unit.stats.defense})`;
-      }
-
-      // 顯示當前效果
-      if (unit.activeEffects.length > 0) {
-        tooltipText += '\n---';
-        const effectDescriptions =
-          this.skillService.getActiveEffectsDescription(unit);
-        effectDescriptions.forEach((desc) => {
-          tooltipText += `\n${desc}`;
-        });
-      }
-
-      this.unitTooltip.setPosition(
-        x * GAME_CONFIG.TILE_SIZE + 10,
-        y * GAME_CONFIG.TILE_SIZE + 10
-      );
-      this.unitTooltip.setVisible(true);
-    } else {
-      this.unitTooltip?.setVisible(false);
-    }
-  }
-
-  /**  顯示地形提示文字 */
-  private showTerrainTooltip(x: number, y: number) {
-    // 如果該位置有單位，不顯示地形資訊
-    const unit = this.gameService.getUnitAt(x, y);
-    if (unit) {
-      this.terrainTooltip?.setVisible(false);
-      return;
-    }
-
-    const gameState = this.gameService.getGameState();
-    const tile = gameState.tiles.find((tile) => tile.x === x && tile.y === y);
-    if (tile) {
-      if (!this.terrainTooltip) {
-        this.terrainTooltip = this.add.text(0, 0, '', {
-          font: GAME_CONFIG.TEXT.FONT_FAMILY,
-          fontSize: 14,
-          color: GAME_CONFIG.TEXT.COLOR,
-          backgroundColor: '#1a1a1a',
-          padding: { x: 8, y: 6 },
-        });
-        this.terrainTooltip.setDepth(999);
-      }
-
-      const terrainInfo = this.terrainRenderer.getTerrainInfo(
-        tile.terrain.terrainType
-      );
-      const defenseText =
-        terrainInfo.defenseBonus > 0
-          ? `+${(terrainInfo.defenseBonus * 100).toFixed(0)}%`
-          : '0%';
-      this.terrainTooltip.setText(
-        `${terrainInfo.emoji} ${terrainInfo.name}\n移動消耗: ${terrainInfo.moveCost}\n防禦加成: ${defenseText}`
-      );
-      this.terrainTooltip.setPosition(
-        x * GAME_CONFIG.TILE_SIZE + 10,
-        y * GAME_CONFIG.TILE_SIZE + 40
-      );
-      this.terrainTooltip.setVisible(true);
-    } else {
-      this.terrainTooltip?.setVisible(false);
-    }
-  }
-
-  private handleClick(x: number, y: number) {
-    const currentPlayerId = this.gameService.currentPlayerId;
-    const clickedUnit = this.gameService.getUnitAt(x, y);
-
-    if (this.currentMode === 'idle') {
-      if (clickedUnit) {
-        // 不管敵方或我方,都發送事件顯示資訊
-        this.eventService.emit({
-          type: GameEventType.UNIT_SELECTED,
-          data: { x, y },
-        });
-        // 只有我方單位才能操控
-        if (clickedUnit.ownerId === currentPlayerId) {
-          if (
-            clickedUnit.actionState.hasMoved &&
-            clickedUnit.actionState.hasAttacked
-          ) {
-            console.log('該單位本回合已行動過');
-            return;
-          }
-          if (clickedUnit.actionState.isStunned) {
-            console.log('該單位被暈眩，無法行動');
-            return;
-          }
-          this.selectedUnitId = clickedUnit.id;
-          this.showMovableArea(clickedUnit.id);
-          this.showAttackableArea(clickedUnit.id);
-
-          console.log(`選擇單位: ${clickedUnit.name}`);
-          return;
-        } else {
-          console.log(`查看敵方單位: ${clickedUnit.name}`);
-        }
-      }
-    }
-
-    if (this.currentMode === 'move') {
-      if (!this.selectedUnitId) return;
-
-      if (clickedUnit) {
-        console.log('該位置有單位:', clickedUnit.name);
-        return;
-      }
-      const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
-      this.executeMove(selectedUnit, x, y);
-      return;
-    }
-
-    if (this.currentMode === 'attack') {
-      if (!this.selectedUnitId) return;
-
-      if (!clickedUnit) {
-        console.log('請點擊敵方單位');
-        return;
-      }
-      if (clickedUnit.ownerId === currentPlayerId) {
-        console.log('不能攻擊己方單位');
-        return;
-      }
-      const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
-      this.executeAttack(selectedUnit, clickedUnit);
-      return;
-    }
-  }
-
-  private executeMove(selectedUnit: Unit, targetX: number, targetY: number) {
-    const path = this.pathfindingService.findPath(
-      this.gameService.getGameState(),
-      { x: selectedUnit.x, y: selectedUnit.y },
-      { x: targetX, y: targetY },
-      selectedUnit.id
-    );
-    if (!path || path.length === 0) {
-      console.log('無法到達');
-      return;
-    }
-    const cmd: GameCommand = {
-      id: 'cmd_' + Date.now(),
-      type: 'MOVE',
-      playerId: this.gameService.currentPlayerId,
-      unitId: this.selectedUnitId!,
-      from: { x: selectedUnit.x, y: selectedUnit.y },
-      to: { x: targetX, y: targetY },
-      timestamp: Date.now(),
-    };
-
-    const result = this.gameService.execute(cmd);
-    if (result.success) {
-      this.clearMovableArea(); // 清除可移動範圍顯示
-      this.clearAttackableArea(); // 清除可攻擊範圍顯示
-
-      const sprite = this.unitRenderer.getUnitSprite(this.selectedUnitId!);
-      if (sprite) {
-        this.inputMgr.disable();
-        this.animationMgr.playPathAnimation(sprite, path, () => {
-          this.inputMgr.enable();
-        });
-      }
-      this.selectedUnitId = null;
-      this.currentMode = 'idle';
-    }
-    console.log(result);
-  }
-
-  private executeAttack(attacker: Unit, defender: Unit) {
-    const cmd: GameCommand = {
-      id: 'cmd_' + Date.now(),
-      type: 'ATTACK',
-      playerId: this.gameService.currentPlayerId,
-      unitId: this.selectedUnitId!,
-      targetId: defender.id,
-      from: { x: attacker.x, y: attacker.y },
-      to: { x: defender.x, y: defender.y },
-      timestamp: Date.now(),
-    };
-
-    const result = this.gameService.execute(cmd);
-    if (result.success) {
-      this.clearMovableArea(); // 清除可移動範圍顯示
-      this.clearAttackableArea(); // 清除可攻擊範圍顯示
-
-      const attackerSprite = this.unitRenderer.getUnitSprite(
-        this.selectedUnitId!
-      );
-      const defenderSprite = this.unitRenderer.getUnitSprite(defender.id);
-      if (attackerSprite && defenderSprite) {
-        this.inputMgr.disable();
-        this.animationMgr.playAttackAnimation(
-          attackerSprite,
-          defenderSprite,
-          () => {
-            this.animationMgr.playDamageAnimation(defenderSprite);
-            // 計算總動畫時間
-            const totalTime = GAME_CONFIG.ANIMATION.ATTACK_DURATION * 2 + 200; // TEST
-            this.time.delayedCall(totalTime, () => {
-              this.inputMgr.enable();
-            });
-          }
-        );
-      }
-      this.selectedUnitId = null;
-      this.currentMode = 'idle';
-    }
-    console.log(result);
-  }
-
-  private handleUnitDeath(unitId: string) {
-    const sprite = this.unitRenderer.getUnitSprite(unitId);
-    if (sprite) {
-      this.animationMgr.playDeathAnimation(sprite, () => {
-        this.unitRenderer.removeUnit(unitId);
-        this.hpBarMgr.removeHpBar(unitId);
-        this.effectRenderer.removeEffectIcons(unitId);
-      });
-    }
-  }
-
-  // 顯示可移動範圍
-  private showMovableArea(unitId: string) {
-    // 清除舊有的可移動範圍
-    this.clearMovableArea();
-
-    // 取的可移動範圍
-    const movableArea = this.pathfindingService.getMovableArea(
-      this.gameService.getGameState(),
-      unitId
-    );
-
-    // 繪製可移動範圍
-    this.movableAreaGraphics = this.add.graphics();
-    this.movableAreaGraphics.fillStyle(
-      GAME_CONFIG.COLOR.MOVABLE_AREA,
-      GAME_CONFIG.COLOR.MOVABLE_AREA_ALPHA
-    );
-    movableArea.forEach((pos) => {
-      this.movableAreaGraphics!.fillRect(
-        pos.x * GAME_CONFIG.TILE_SIZE,
-        pos.y * GAME_CONFIG.TILE_SIZE,
-        GAME_CONFIG.TILE_SIZE,
-        GAME_CONFIG.TILE_SIZE
-      );
-    });
-  }
-
-  // 清除可移動範圍顯示
-  private clearMovableArea() {
-    this.movableAreaGraphics?.clear();
-    this.movableAreaGraphics?.destroy();
-    this.movableAreaGraphics = undefined;
-  }
-
-  // 顯示可攻擊範圍
-  private showAttackableArea(unitId: string) {
-    // 清除舊有的可攻擊範圍
-    this.clearAttackableArea();
-    // 取的可攻擊範圍
-    const attackableArea = this.pathfindingService.getAttackableArea(
-      this.gameService.getGameState(),
-      unitId
-    );
-    // 繪製可攻擊範圍
-    this.attackableAreaGraphics = this.add.graphics();
-    this.attackableAreaGraphics.fillStyle(
-      GAME_CONFIG.COLOR.ATTACKABLE_AREA,
-      GAME_CONFIG.COLOR.ATTACKABLE_AREA_ALPHA
-    );
-    attackableArea.forEach((pos) => {
-      this.attackableAreaGraphics!.fillRect(
-        pos.x * GAME_CONFIG.TILE_SIZE,
-        pos.y * GAME_CONFIG.TILE_SIZE,
-        GAME_CONFIG.TILE_SIZE,
-        GAME_CONFIG.TILE_SIZE
-      );
-    });
-  }
-
-  // 清除可攻擊範圍顯示
-  private clearAttackableArea() {
-    this.attackableAreaGraphics?.clear();
-    this.attackableAreaGraphics?.destroy();
-    this.attackableAreaGraphics = undefined;
-  }
-  // ===== 視覺效果方法 =====
-
-  private showDamageNumber(
-    x: number,
-    y: number,
-    damage: number,
-    isCritical: boolean
-  ) {
-    const pixelX = x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-    const pixelY = y * GAME_CONFIG.TILE_SIZE;
-
-    const text = this.add.text(pixelX, pixelY, `-${damage}`, {
-      fontSize: isCritical ? '32px' : '24px',
-      color: isCritical ? '#ff0000' : '#ff6b6b',
-      fontStyle: 'bold',
-      stroke: '#000000',
-      strokeThickness: 4,
-    });
-    text.setOrigin(0.5);
-    text.setDepth(1000);
-
-    this.tweens.add({
-      targets: text,
-      y: pixelY - 50,
-      alpha: 0,
-      duration: 1000,
-      ease: 'Power2',
-      onComplete: () => text.destroy(),
-    });
-  }
-
-  private showHealNumber(x: number, y: number, amount: number) {
-    const pixelX = x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-    const pixelY = y * GAME_CONFIG.TILE_SIZE;
-
-    const text = this.add.text(pixelX, pixelY, `+${amount}`, {
-      fontSize: '24px',
-      color: '#00ff00',
-      fontStyle: 'bold',
-      stroke: '#000000',
-      strokeThickness: 4,
-    });
-    text.setOrigin(0.5);
-    text.setDepth(1000);
-
-    this.tweens.add({
-      targets: text,
-      y: pixelY - 50,
-      alpha: 0,
-      duration: 1000,
-      ease: 'Power2',
-      onComplete: () => text.destroy(),
-    });
-  }
-
-  private showCriticalEffect(x: number, y: number) {
-    const pixelX = x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-    const pixelY = y * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-
-    const circle = this.add.circle(pixelX, pixelY, 5, 0xff0000);
-    circle.setDepth(999);
-
-    this.tweens.add({
-      targets: circle,
-      radius: 40,
-      alpha: 0,
-      duration: 500,
-      ease: 'Power2',
-      onComplete: () => circle.destroy(),
-    });
-  }
-
-  private showEvadeEffect(x: number, y: number) {
-    const pixelX = x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-    const pixelY = y * GAME_CONFIG.TILE_SIZE;
-
-    const text = this.add.text(pixelX, pixelY, 'MISS!', {
-      fontSize: '20px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-      stroke: '#000000',
-      strokeThickness: 4,
-    });
-    text.setOrigin(0.5);
-    text.setDepth(1000);
-
-    this.tweens.add({
-      targets: text,
-      y: pixelY - 40,
-      alpha: 0,
-      duration: 800,
-      ease: 'Power2',
-      onComplete: () => text.destroy(),
-    });
-  }
-
-  private showLevelUpEffect(unitId: string) {
-    const unit = this.gameService.getUnitById(unitId);
-    if (!unit) return;
-
-    const pixelX = unit.x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-    const pixelY = unit.y * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-
-    // 發光效果
-    const circle = this.add.circle(pixelX, pixelY, 10, 0xffd700);
-    circle.setDepth(999);
-
-    this.tweens.add({
-      targets: circle,
-      radius: 50,
-      alpha: 0,
-      duration: 1000,
-      ease: 'Power2',
-      onComplete: () => circle.destroy(),
-    });
-
-    // LEVEL UP 文字
-    const text = this.add.text(pixelX, pixelY - 30, 'LEVEL UP!', {
-      fontSize: '20px',
-      color: '#ffd700',
-      fontStyle: 'bold',
-      stroke: '#000000',
-      strokeThickness: 4,
-    });
-    text.setOrigin(0.5);
-    text.setDepth(1000);
-
-    this.tweens.add({
-      targets: text,
-      y: pixelY - 60,
-      alpha: 0,
-      duration: 1500,
-      ease: 'Power2',
-      onComplete: () => text.destroy(),
-    });
-  }
-
-  private showSkillEffect(unitId: string, skillId: string) {
-    const unit = this.gameService.getUnitById(unitId);
-    if (!unit) return;
-
-    const pixelX = unit.x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-    const pixelY = unit.y * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
-
-    // 技能特效圓圈
-    const circle = this.add.circle(pixelX, pixelY, 5, 0x87ceeb);
-    circle.setDepth(999);
-
-    this.tweens.add({
-      targets: circle,
-      radius: 35,
-      alpha: 0,
-      duration: 600,
-      ease: 'Power2',
-      onComplete: () => circle.destroy(),
-    });
-  }
-
-  private updateAllEffectIcons() {
-    const gameState = this.gameService.getGameState();
-    gameState.units.forEach((unit) => {
-      if (unit.alive) {
-        this.effectRenderer.updateEffectIcons(unit);
-      }
-    });
+  /**
+   * 公開方法：給 Handler 使用
+   */
+  public getVisualHandler(): SceneVisualHandler {
+    return this.visualHandler;
   }
 }
