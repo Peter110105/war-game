@@ -44,9 +44,8 @@ export class VictoryService {
     const alivePlayers = Array.from(aliveCounts.entries()).filter(
       ([_, count]) => count > 0
     );
-
     // 只剩一個玩家 → 遊戲結束
-    if (alivePlayers.length > 0) {
+    if (alivePlayers.length === 1) {
       const [winnerId] = alivePlayers[0];
       return {
         isGameOver: true,
