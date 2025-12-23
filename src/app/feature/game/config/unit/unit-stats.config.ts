@@ -158,7 +158,7 @@ export const UNIT_BASE_CONFIGS: Record<string, UnitConfig> = {
  * @returns 單位配置(如果找不到則返回預設劍士配置)
  */
 export function getUnitConfig(type: UnitType | string): UnitConfig {
-  const config = UNIT_BASE_CONFIGS[type];
+  const config = UNIT_BASE_CONFIGS[type.toUpperCase()];
   if (!config) {
     console.warn(
       `Unit config not found for type: ${type}, using SOLDIER as default`

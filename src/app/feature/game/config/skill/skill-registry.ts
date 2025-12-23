@@ -16,7 +16,7 @@ export const SKILL_REGISTRY: Record<string, Skill> = {
  * @returns 技能 或 undefined
  */
 export function getSkillById(skillId: string): Skill | undefined {
-  const skill = SKILL_REGISTRY[skillId];
+  const skill = SKILL_REGISTRY[skillId.toUpperCase()];
   if (!skill) {
     console.warn(`Skill not found: ${skillId}`);
     return undefined;
