@@ -1,5 +1,5 @@
 // src/app/feature/game/config/terrain.config.ts
-import { Terrain, TerrainType } from '../model/tile.model';
+import { Terrain, TerrainType } from '../../model/tile.model';
 
 /**
  * 地形配置介面

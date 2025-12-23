@@ -5,14 +5,14 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { GameStateService } from '../../feature/game/service/game-state.service';
-import { PHASER_CONFIG } from '../../feature/game/phaser/phaser-config';
+import { GameStateService } from '../../feature/game/state/game-state.service';
+import { PHASER_CONFIG } from '../../feature/game/phaser/config/phaser-config';
 import { Subscription } from 'rxjs';
 import {
   GameEventService,
   GameEventType,
-} from '../../feature/game/service/game-event.service';
-import { PathfindingService } from '../../feature/game/logic/path-finding.service';
+} from '../../feature/game/state/game-event.service';
+import { PathfindingService } from '../../feature/game/movement/path-finding.service';
 import { Unit } from '../../feature/game/model/unit.model';
 import { GameCommand } from '../../feature/game/command/command.interface';
 import { CommonModule } from '@angular/common';
@@ -22,8 +22,8 @@ import {
 } from './components/action-menu/action-menu.component';
 import { UnitInfoPanelComponent } from './components/unit-info-panel/unit-info-panel.component';
 import { GameResultModalComponent } from './components/game-result-modal/game-result-modal.component';
-import { VictoryService } from '../../feature/game/service/victory.service';
-import { SkillService } from '../../feature/game/service/skill.service';
+import { VictoryService } from '../../feature/game/level/victory.service';
+import { SkillService } from '../../feature/game/skill/skill.service';
 
 @Component({
   selector: 'app-battlefield',

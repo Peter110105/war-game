@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { GameState } from '../../model/game-state.model';
-import { GAME_CONFIG } from '../../config/game.config';
+import { GameState } from '../../../model/game-state.model';
+import { GAME_CONFIG } from '../../../config/game/game.config';
 
 /**
  * 單位管理員
@@ -22,6 +22,7 @@ export class UnitRendererManager {
 
     // 繪製所有活著的單位
     gameState.units.forEach((unit) => {
+      console.log('drawUnits', unit);
       if (!unit.alive) return;
 
       const color =

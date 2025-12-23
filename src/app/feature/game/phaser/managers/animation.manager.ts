@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_CONFIG } from '../../config/game.config';
+import { GAME_CONFIG } from '../../config/game/game.config';
 
 /**
  * 動畫管理員

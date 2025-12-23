@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GameState } from '../model/game-state.model';
 import { GameCommand, MoveCommand } from '../command/command.interface';
-import { GameEventService, GameEventType } from '../service/game-event.service';
+import { GameEventService, GameEventType } from '../state/game-event.service';
 
 @Injectable({
   providedIn: 'root',

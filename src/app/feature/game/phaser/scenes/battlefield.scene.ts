@@ -1,21 +1,21 @@
 import Phaser from 'phaser';
 import { GameCommand } from '../../command/command.interface';
-import { GameStateService } from '../../service/game-state.service';
+import { GameStateService } from '../../state/game-state.service';
 import {
   GameEventService,
   GameEventType,
-} from '../../service/game-event.service';
-import { PathfindingService } from '../../logic/path-finding.service';
-import { GAME_CONFIG } from '../../config/game.config';
-import { UnitRendererManager } from '../manager/unit-renderer.manager';
-import { AnimationManager } from '../manager/animation.manager';
-import { InputManager } from '../manager/input.manager';
-import { HpBarManager } from '../manager/hp-bar.manager';
+} from '../../state/game-event.service';
+import { PathfindingService } from '../../movement/path-finding.service';
+import { GAME_CONFIG } from '../../config/game/game.config';
+import { UnitRendererManager } from '../managers/rendering/unit-renderer.manager';
+import { AnimationManager } from '../managers/animation.manager';
+import { InputManager } from '../managers/input.manager';
+import { HpBarManager } from '../managers/rendering/hp-bar.manager';
 import { Unit } from '../../model/unit.model';
-import { TerrainRendererManager } from '../manager/terrain-renderer.manager';
+import { TerrainRendererManager } from '../managers/rendering/terrain-renderer.manager';
 import { SkillEffectType } from '../../model/skill.model';
-import { SkillService } from '../../service/skill.service';
-import { EffectRendererManager } from '../manager/effect-renderer.manager';
+import { SkillService } from '../../skill/skill.service';
+import { EffectRendererManager } from '../managers/rendering/effect-renderer.manager';
 /**
  * 遊戲場景(協調者)
  */

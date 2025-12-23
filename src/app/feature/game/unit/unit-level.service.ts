@@ -1,8 +1,8 @@
 // src/app/feature/game/service/unit-level.service.ts
 import { Injectable } from '@angular/core';
 import { Unit } from '../model/unit.model';
-import { EXP_CONFIG, getExpToNextLevel } from '../config/unit.config';
-import { GameEventService, GameEventType } from './game-event.service';
+import { EXP_CONFIG, getExpToNextLevel } from '../config/unit';
+import { GameEventService, GameEventType } from '../state/game-event.service';
 
 @Injectable({ providedIn: 'root' })
 export class UnitLevelService {

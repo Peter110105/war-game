@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { GameCommand } from '../command/command.interface';
 import { GameState } from '../model/game-state.model';
-import { CombatCalculator } from '../logic/combat-calculator.service';
-import { GameEventService, GameEventType } from '../service/game-event.service';
-import { UnitLevelService } from '../service/unit-level.service';
+import { CombatCalculator } from '../combat/combat-calculator.service';
+import { GameEventService, GameEventType } from '../state/game-event.service';
+import { UnitLevelService } from '../unit/unit-level.service';
 import { Unit } from '../model/unit.model';
 import { TriggerTiming } from '../model/skill.model';
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SkillService } from '../service/skill.service';
+import { SkillService } from '../skill/skill.service';
 import { Unit } from '../model/unit.model';
 import { SkillEffectType } from '../model/skill.model';
 

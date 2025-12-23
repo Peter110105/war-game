@@ -3,13 +3,13 @@ import { GameStateLoaderService } from '../../../core/service/game-state-loader.
 import { GameEventService, GameEventType } from './game-event.service';
 import { GameState } from '../model/game-state.model';
 import { GameCommand } from '../command/command.interface';
-import { MovementProcessor } from '../processor/movement-processor';
-import { CombatProcessor } from '../processor/combat-processor';
+import { MovementProcessor } from '../movement/movement-processor';
+import { CombatProcessor } from '../combat/combat-processor';
 import { Unit } from '../model/unit.model';
 import { Player } from '../model/player.model';
 import { GameStateFactory } from '../factory/game-state.factory';
 import { SkillEffectType } from '../model/skill.model';
-import { SkillService } from './skill.service';
+import { SkillService } from '../skill/skill.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateService {

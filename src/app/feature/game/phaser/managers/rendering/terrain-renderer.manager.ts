@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
-import { GameState } from '../../model/game-state.model';
-import { GAME_CONFIG } from '../../config/game.config';
-import { TERRAIN_CONFIG } from '../../config/terrain.config';
-import { TerrainType } from '../../model/tile.model';
+import { GameState } from '../../../model/game-state.model';
+import { GAME_CONFIG } from '../../../config/game/game.config';
+import { TERRAIN_CONFIG } from '../../../config/terrain/terrain.config';
+import { TerrainType } from '../../../model/tile.model';
 
 /**
  * 地形渲染管理器

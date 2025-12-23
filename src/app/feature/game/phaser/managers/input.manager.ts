@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_CONFIG } from '../../config/game.config';
+import { GAME_CONFIG } from '../../config/game/game.config';
 
 export type ClickCallback = (x: number, y: number) => void;
 export type MoveCallback = (x: number, y: number) => void;

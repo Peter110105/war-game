@@ -1,7 +1,7 @@
 // pathfinding.service.ts (新增)
 import { Injectable } from '@angular/core';
 import { GameState } from '../model/game-state.model';
-import { SkillService } from '../service/skill.service';
+import { SkillService } from '../skill/skill.service';
 import { SkillEffectType } from '../model/skill.model';
 
 type PathNode = {

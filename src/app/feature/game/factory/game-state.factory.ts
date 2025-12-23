@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Unit, UnitType } from '../model/unit.model';
 import { Player } from '../model/player.model';
 import { GameState } from '../model/game-state.model';
-import { getTerrainConfig } from '../config/terrain.config';
 import { TerrainType, Tile } from '../model/tile.model';
-import { getExpToNextLevel, getUnitConfig } from '../config/unit.config';
+import { getTerrainConfig } from '../config/terrain/terrain.config';
+import { getExpToNextLevel, getUnitConfig } from '../config/unit';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateFactory {
@@ -196,6 +196,13 @@ export class GameStateFactory {
     } else {
       units.push(...this.createDefaultUnits());
     }
+    console.log('createGameFromConfig', {
+      width,
+      height,
+      units,
+      players,
+      tiles,
+    });
     return this.createNewGame(width, height, units, players, tiles);
   }
 

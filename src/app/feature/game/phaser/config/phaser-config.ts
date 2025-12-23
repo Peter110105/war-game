@@ -1,6 +1,6 @@
-import Phaser from "phaser";
-import { BattlefieldScene } from './scene/battlefield.scene';
-import { GAME_CONFIG } from '../config/game.config';
+import Phaser from 'phaser';
+import { BattlefieldScene } from '../scenes/battlefield.scene';
+import { GAME_CONFIG } from '../../config/game/game.config';
 
 export const PHASER_CONFIG = {
   type: Phaser.AUTO,

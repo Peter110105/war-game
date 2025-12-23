@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GameEventService, GameEventType } from './game-event.service';
+import { GameEventService, GameEventType } from '../state/game-event.service';
 import {
   Skill,
   SkillEffect,
