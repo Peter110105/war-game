@@ -23,25 +23,25 @@ export class GameStateService {
     private gameStateFactory: GameStateFactory,
     private skillService: SkillService
   ) {
-    this.state = this.gameStateFactory.createDefaultGame();
+    // this.state = this.gameStateFactory.createDefaultGame();
 
     // 確保所有單位都有 activeEffects 陣列
-    this.state.units.forEach((unit) => {
-      if (!unit.activeEffects) {
-        unit.activeEffects = [];
-      }
-    });
+    // this.state.units.forEach((unit) => {
+    //   if (!unit.activeEffects) {
+    //     unit.activeEffects = [];
+    //   }
+    // });
 
     // 非同步加載資料
     this.gameStateLoaderService.loadInitialState().subscribe((loadedState) => {
-      this.state = loadedState;
+      this.state = this.gameStateFactory.createGameFromConfig(loadedState);
 
       // 確保載入的單位也有 activeEffects
-      this.state.units.forEach((unit) => {
-        if (!unit.activeEffects) {
-          unit.activeEffects = [];
-        }
-      });
+      // this.state.units.forEach((unit) => {
+      //   if (!unit.activeEffects) {
+      //     unit.activeEffects = [];
+      //   }
+      // });
     });
   }
 
