@@ -24,6 +24,10 @@ import { UnitInfoPanelComponent } from './components/unit-info-panel/unit-info-p
 import { GameResultModalComponent } from './components/game-result-modal/game-result-modal.component';
 import { VictoryService } from '../../feature/game/level/victory.service';
 import { SkillService } from '../../feature/game/skill/skill.service';
+import {
+  SkillMenuComponent,
+  SkillMenuAction,
+} from './components/skill-menu/skill-menu.component';
 
 @Component({
   selector: 'app-battlefield',
@@ -31,6 +35,7 @@ import { SkillService } from '../../feature/game/skill/skill.service';
   imports: [
     CommonModule,
     ActionMenuComponent,
+    SkillMenuComponent,
     UnitInfoPanelComponent,
     GameResultModalComponent,
   ],
@@ -46,10 +51,12 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
   selectedUnit: Unit | null = null;
   hoveredUnit: Unit | null = null; // 用於顯示資訊的單位
   showActionMenu = false;
+  showSkillMenu = false;
   menuPosition = { x: 0, y: 0 };
 
   // 當前模式
-  currentMode: 'idle' | 'move' | 'attack' = 'idle';
+  currentMode: 'idle' | 'move' | 'attack' | 'skill' = 'idle';
+  selectedSkillId: string | null = null;
 
   // 遊戲結果狀態
   showResultModal = false;
@@ -100,15 +107,15 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
 
     // 關閉選單
     this.showActionMenu = false;
+    this.showSkillMenu = false;
     this.selectedUnit = null;
   }
 
   /**
    * 處理命令選單的動作
    */
-  onActionSelected(action: ActionType) {
+  public onActionSelected(action: ActionType) {
     console.log('Action selected:', action);
-
     switch (action) {
       case 'move':
         // 進入移動模式
@@ -131,6 +138,11 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
           type: GameEventType.PLAYER_ACTION_ATTACKED,
           data: { unitId: this.selectedUnit?.id },
         });
+        break;
+      case 'skill':
+        // 切換到技能選單
+        this.showActionMenu = false;
+        this.showSkillMenu = true;
         break;
       case 'wait':
         // 待機 (標記單位已完成行動)
@@ -164,6 +176,35 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * 處理技能選單的動作
+   */
+  public onSkillMenuAction(action: SkillMenuAction) {
+    switch (action.type) {
+      case 'cancel':
+        // 返回命令選單
+        this.showSkillMenu = false;
+        this.showActionMenu = true;
+        this.selectedSkillId = null;
+        break;
+      case 'use-skill':
+        this.selectedSkillId = action.skillId;
+        this.currentMode = 'skill';
+        this.showSkillMenu = false;
+
+        // 發送事件給 Phaser 顯示技能範圍
+        this.eventService.emit({
+          type: GameEventType.SKILL_USED,
+          data: {
+            unitId: this.selectedUnit?.id,
+            skillId: action.skillId,
+            selectingTarget: true,
+          },
+        });
+        break;
+    }
+  }
+
   private initPhaserGame() {
     const config: Phaser.Types.Core.GameConfig = {
       ...PHASER_CONFIG,
@@ -193,9 +234,11 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
                 y: event.data.y * 64,
               };
               this.showActionMenu = true;
+              this.showSkillMenu = false;
             } else {
               this.selectedUnit = null;
               this.showActionMenu = false;
+              this.showSkillMenu = false;
             }
           }
           console.log('Unit selected:', this.selectedUnit?.name);
@@ -204,6 +247,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
         case GameEventType.UNIT_MOVED:
           console.log('Unit moved:', event.data);
           this.showActionMenu = false;
+          this.showSkillMenu = false;
           this.selectedUnit = null;
           this.hoveredUnit = null;
           this.currentMode = 'idle';
@@ -230,8 +274,8 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
           ) {
             console.log(`🩸 吸血 ${event.data.attackerLifeSteal} HP！`);
           }
-
           this.showActionMenu = false;
+          this.showSkillMenu = false;
           this.selectedUnit = null;
           this.hoveredUnit = null;
           this.currentMode = 'idle';
@@ -249,12 +293,19 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
           break;
 
         case GameEventType.SKILL_USED:
-          console.log('✨ Skill used:', event.data);
+          if (!event.data.selectingTarget) {
+            console.log('✨ 技能使用:', event.data);
+            this.showSkillMenu = false;
+            this.selectedSkillId = null;
+            this.selectedUnit = null;
+            this.currentMode = 'idle';
+          }
           break;
 
         case GameEventType.TURN_ENDED:
           console.log('Turn ended:', event.data);
           this.showActionMenu = false;
+          this.showSkillMenu = false;
           this.selectedUnit = null;
           this.hoveredUnit = null;
           this.currentMode = 'idle';

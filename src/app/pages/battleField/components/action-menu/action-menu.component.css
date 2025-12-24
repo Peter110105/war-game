@@ -45,7 +45,6 @@
 .menu-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  /* grid-template-columns: 1fr; */
   gap: 8px;
 }
 
@@ -95,6 +94,10 @@
 
 .attack-btn:hover:not(:disabled) {
   background: rgba(255, 100, 100, 0.3);
+}
+
+.skill-btn:hover:not(:disabled) {
+  background: rgba(255, 215, 0, 0.3);
 }
 
 .wait-btn:hover:not(:disabled) {

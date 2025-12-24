@@ -1,7 +1,6 @@
-<!-- action-menu.component.html -->
+@if(selectedUnit){
 <div
   class="action-menu"
-  *ngIf="selectedUnit"
   [style.left.px]="position.x"
   [style.top.px]="position.y"
 >
@@ -32,6 +31,15 @@
       <span class="btn-text">攻擊</span>
     </button>
 
+    <button
+      class="action-btn skill-btn"
+      [disabled]="!hasActiveSkills"
+      (click)="selectAction('skill')"
+    >
+      <span class="btn-icon">✨</span>
+      <span class="btn-text">技能</span>
+    </button>
+
     <button class="action-btn wait-btn" (click)="selectAction('wait')">
       <span class="btn-icon">⏸️</span>
       <span class="btn-text">待機</span>
@@ -43,3 +51,4 @@
     </button>
   </div>
 </div>
+}

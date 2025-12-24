@@ -1,0 +1,84 @@
+@if (unit) {
+<div
+  class="skill-menu"
+  [style.left.px]="position.x"
+  [style.top.px]="position.y"
+>
+  <!-- 標題 -->
+  <div class="menu-header">
+    <div class="header-content">
+      <span class="unit-name">{{ unit.name }}</span>
+      @if(unit.stats.mana !== undefined){
+      <span class="unit-mana">
+        💙 {{ unit.stats.mana }}/{{ unit.stats.maxMana }}
+      </span>
+      }
+    </div>
+    <button class="close-btn" (click)="cancel()">✕</button>
+  </div>
+
+  <!-- 可用技能 -->
+  @if(availableSkills.length > 0){
+  <div class="skills-section">
+    <div class="section-title">可用技能</div>
+    <div class="skills-list">
+      @for (skill of availableSkills; track $index) {
+      <button
+        class="skill-btn"
+        (click)="selectSkill(skill.id)"
+        [disabled]="!canAffordSkill(skill)"
+      >
+        <div class="skill-icon">{{ getSkillIcon(skill.id) }}</div>
+        <div class="skill-info">
+          <div class="skill-name-row">
+            <span class="skill-name">{{ skill.name }}</span>
+            @if(skill.manaCost){
+            <span class="skill-cost"> 💙 {{ skill.manaCost }} </span>
+            }
+          </div>
+          <div class="skill-desc">{{ skill.description }}</div>
+          @if(getEffectCount(skill) > 1){
+          <div class="skill-effects">
+            <span class="effect-badge">{{ getEffectCount(skill) }} 種效果</span>
+          </div>
+          }
+        </div>
+      </button>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- 冷卻中技能 -->
+  @if(cooldownSkills.length > 0){
+  <div class="cooldown-section">
+    <div class="section-title">冷卻中</div>
+    <div class="cooldown-list">
+      @for (skill of cooldownSkills; track $index) {
+      <div class="cooldown-skill">
+        <span class="skill-icon-small">{{ getSkillIcon(skill.id) }}</span>
+        <span class="skill-name-small">{{ skill.name }}</span>
+        <span class="cooldown-turns">⏰ {{ skill.currentCooldown }}</span>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- 無可用技能提示 -->
+  @if(availableSkills.length === 0 && cooldownSkills.length === 0) {
+  <div class="no-skills">
+    <span class="no-skills-icon">✨</span>
+    <span class="no-skills-text">沒有主動技能</span>
+  </div>
+  }
+
+  <!-- 取消按鈕 -->
+  <div class="menu-footer">
+    <button class="cancel-btn" (click)="cancel()">
+      <span class="btn-icon">❌</span>
+      <span class="btn-text">取消</span>
+    </button>
+  </div>
+</div>
+}

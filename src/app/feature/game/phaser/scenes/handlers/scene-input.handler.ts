@@ -14,17 +14,20 @@ import { InputManager } from '../../managers/input.manager';
 import { GAME_CONFIG } from '../../../config/game/game.config';
 import { SkillService } from '../../../skill/skill.service';
 import { TerrainRendererManager } from '../../managers/rendering/terrain-renderer.manager';
+import { TargetType } from '../../../model/skill.model';
 
 /**
  * 場景輸入處理器
  * 職責：處理所有玩家輸入和模式切換
  */
 export class SceneInputHandler {
-  private currentMode: 'idle' | 'move' | 'attack' = 'idle'; // 模式
+  private currentMode: 'idle' | 'move' | 'attack' | 'skill' = 'idle'; // 模式
   private selectedUnitId: string | null = null;
+  private selectedSkillId: string | null = null;
 
   private movableAreaGraphics?: Phaser.GameObjects.Graphics; // 可移動範圍圖形
   private attackableAreaGraphics?: Phaser.GameObjects.Graphics; // 可攻擊範圍圖形
+  private skillRangeGraphics?: Phaser.GameObjects.Graphics; // 技能範圍圖形
   private unitTooltip?: Phaser.GameObjects.Text; // 單位提示文字
   private terrainTooltip?: Phaser.GameObjects.Text; // 地形提示文字
 
@@ -78,6 +81,12 @@ export class SceneInputHandler {
           this.showAttackableArea(event.data.unitId);
           this.clearMovableArea();
           break;
+        case GameEventType.SKILL_USED:
+          this.currentMode = 'skill';
+          this.selectedSkillId = event.data.skillId;
+          this.clearMovableArea();
+          this.clearAttackableArea();
+          break;
         case GameEventType.PLAYER_ACTION_WAIT:
         case GameEventType.PLAYER_ACTION_CANCELLED:
           this.resetMode();
@@ -101,6 +110,8 @@ export class SceneInputHandler {
       this.handleMoveClick(x, y, clickedUnit);
     } else if (this.currentMode === 'attack') {
       this.handleAttackClick(clickedUnit, currentPlayerId);
+    } else if (this.currentMode === 'skill') {
+      this.handleSKillClick(x, y, clickedUnit, currentPlayerId);
     }
   }
 
@@ -181,6 +192,71 @@ export class SceneInputHandler {
 
     const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
     this.executeAttack(selectedUnit, clickedUnit);
+  }
+
+  /**
+   * 處理技能點擊（選擇目標）
+   */
+  private handleSKillClick(
+    x: number,
+    y: number,
+    clickedUnit: Unit | undefined,
+    currentPlayerId: string
+  ): void {
+    if (!this.selectedUnitId) return;
+
+    const caster = this.gameService.getUnitById(this.selectedUnitId)!;
+    if (!caster) return;
+
+    const skill = caster.skills.find(
+      (skill) => skill.id === this.selectedSkillId
+    );
+    if (!skill) return;
+
+    // 根據技能目標類型決定目標選擇
+    const targetType = skill.effects[0].targetType;
+
+    // 收集可能的目標
+    let targets: Unit[] = [];
+    if (targetType === TargetType.SELF) {
+      targets = [caster];
+    } else if (clickedUnit) {
+      if (
+        targetType === TargetType.ALLY &&
+        clickedUnit.ownerId !== currentPlayerId
+      ) {
+        console.log('必須選擇友軍單位');
+        return;
+      }
+      if (
+        targetType === TargetType.ENEMY &&
+        clickedUnit.ownerId === currentPlayerId
+      ) {
+        console.log('必須選擇敵方單位');
+        return;
+      }
+      targets = [clickedUnit];
+    } else if (
+      targetType === TargetType.ALLY_ALL ||
+      targetType === TargetType.ENEMY_ALL
+    ) {
+      // 範圍技能，不需要具體目標
+      const allUnits = this.gameService.getUnits();
+      if (targetType === TargetType.ALLY_ALL) {
+        targets = allUnits.filter(
+          (u) => u.ownerId === currentPlayerId && u.alive
+        );
+      } else {
+        targets = allUnits.filter(
+          (u) => u.ownerId !== currentPlayerId && u.alive
+        );
+      }
+    } else {
+      console.log('請選擇有效目標');
+      return;
+    }
+
+    this.executeSkill(caster, skill.id, targets);
   }
 
   /**
@@ -272,6 +348,39 @@ export class SceneInputHandler {
   }
 
   /**
+   * 執行技能
+   */
+  private executeSkill(caster: Unit, skillId: string, targets: Unit[]): void {
+    const skill = caster.skills.find((s) => s.id === skillId);
+    if (!skill) return;
+
+    const result = this.skillService.useSkill(caster, skill, targets);
+
+    if (result.success) {
+      console.log(`✨ ${caster.name} 使用了 ${skill.name}`);
+
+      // 標記已使用技能（視為攻擊動作）
+      caster.actionState.hasAttacked = true;
+
+      // 發送技能使用事件
+      this.eventService.emit({
+        type: GameEventType.SKILL_USED,
+        data: {
+          unitId: caster.id,
+          skillId: skill.id,
+          targetIds: targets.map((t) => t.id),
+          selectingTarget: false,
+        },
+      });
+
+      this.clearAllAreas();
+      this.resetMode();
+    } else {
+      console.log('技能使用失敗:', result.message);
+    }
+  }
+
+  /**
    * 顯示可移動範圍
    */
   private showMovableArea(unitId: string): void {
@@ -318,6 +427,51 @@ export class SceneInputHandler {
     );
     attackableArea.forEach((pos) => {
       this.attackableAreaGraphics!.fillRect(
+        pos.x * GAME_CONFIG.TILE_SIZE,
+        pos.y * GAME_CONFIG.TILE_SIZE,
+        GAME_CONFIG.TILE_SIZE,
+        GAME_CONFIG.TILE_SIZE
+      );
+    });
+  }
+
+  /**
+   * 顯示技能範圍
+   */
+  private showSkillRange(unitId: string, skillId: string): void {
+    this.clearSkillRange();
+
+    const unit = this.gameService.getUnitById(unitId);
+    if (!unit) return;
+
+    const skill = unit.skills.find((s) => s.id === skillId);
+    if (!skill) return;
+
+    // 獲取技能的射程
+    const range = skill.effects[0]?.range || 1;
+
+    // 計算範圍內的所有格子
+    const rangeArea: { x: number; y: number }[] = [];
+    const gameState = this.gameService.getGameState();
+
+    for (let dy = -range; dy <= range; dy++) {
+      for (let dx = -range; dx <= range; dx++) {
+        const distance = Math.abs(dx) + Math.abs(dy);
+        if (distance > 0 && distance <= range) {
+          const x = unit.x + dx;
+          const y = unit.y + dy;
+          if (x >= 0 && x < gameState.width && y >= 0 && y < gameState.height) {
+            rangeArea.push({ x, y });
+          }
+        }
+      }
+    }
+
+    // 繪製技能範圍（使用金色表示）
+    this.skillRangeGraphics = this.scene.add.graphics();
+    this.skillRangeGraphics.fillStyle(0xffd700, 0.3);
+    rangeArea.forEach((pos) => {
+      this.skillRangeGraphics!.fillRect(
         pos.x * GAME_CONFIG.TILE_SIZE,
         pos.y * GAME_CONFIG.TILE_SIZE,
         GAME_CONFIG.TILE_SIZE,
@@ -442,11 +596,21 @@ export class SceneInputHandler {
   }
 
   /**
+   * 清除技能範圍
+   */
+  private clearSkillRange(): void {
+    this.skillRangeGraphics?.clear();
+    this.skillRangeGraphics?.destroy();
+    this.skillRangeGraphics = undefined;
+  }
+
+  /**
    * 清除所有範圍顯示
    */
   private clearAllAreas(): void {
     this.clearMovableArea();
     this.clearAttackableArea();
+    this.clearSkillRange();
   }
 
   /**
@@ -455,6 +619,7 @@ export class SceneInputHandler {
   private resetMode(): void {
     this.currentMode = 'idle';
     this.selectedUnitId = null;
+    this.selectedSkillId = null;
     this.clearAllAreas();
   }
 

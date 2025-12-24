@@ -13,6 +13,14 @@
         (actionSelected)="onActionSelected($event)"
       ></app-action-menu>
       }
+      <!-- 技能選單 -->
+      @if(showSkillMenu){
+      <app-skill-menu
+        [unit]="selectedUnit"
+        [position]="menuPosition"
+        (actionSelected)="onSkillMenuAction($event)"
+      ></app-skill-menu>
+      }
     </div>
   </div>
   <!-- 右側資訊欄 -->
