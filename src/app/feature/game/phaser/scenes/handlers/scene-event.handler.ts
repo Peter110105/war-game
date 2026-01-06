@@ -40,12 +40,13 @@ export class SceneEventHandler {
         case GameEventType.UNIT_LEVEL_UP:
           this.handleUnitLevelUp(event.data);
           break;
-        case GameEventType.SKILL_USED:
-          this.handleSkillUsed(event.data);
+        case GameEventType.SKILL_ACTIVATED:
+          this.handleSkillActivated(event.data);
           break;
         case GameEventType.TURN_ENDED:
           this.handleTurnEnded();
           break;
+        case GameEventType.SKILL_TARGET_SELECT:
         case GameEventType.PLAYER_ACTION_MOVED:
         case GameEventType.PLAYER_ACTION_ATTACKED:
         case GameEventType.PLAYER_ACTION_WAIT:
@@ -133,14 +134,30 @@ export class SceneEventHandler {
     visualHandler.showLevelUpEffect(data.unitId);
   }
   /**
-   * 處理技能使用
+   * 處理技能啟動
    * @param data 事件數據
    */
-  private handleSkillUsed(data: any): void {
-    console.log('處理技能使用事件:', data);
+  private handleSkillActivated(data: any): void {
+    console.log('處理技能啟動事件:', data);
     const visualHandler = (this.scene as any).getVisualHandler();
+
+    // 顯示技能效果
     visualHandler.showSkillEffect(data.unitId, data.skillId);
+
+    // 更新所有受影響目標的狀態
+    if (data.targetIds && Array.isArray(data.targetIds)) {
+      data.targetIds.forEach((targetId: string) => {
+        const target = this.gameService.getUnitById(targetId);
+        if (target) {
+          // 更新血條（可能被治療或受傷）
+          this.hpBarMgr.updateHpBar(target);
+          // 更新效果圖示（可能有新的 buff/debuff）
+          this.effectRenderer.updateEffectIcons(target);
+        }
+      });
+    }
   }
+
   /**
    * 處理回合結束
    */

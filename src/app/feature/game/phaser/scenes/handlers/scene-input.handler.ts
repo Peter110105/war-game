@@ -74,19 +74,24 @@ export class SceneInputHandler {
           this.currentMode = 'move';
           this.showMovableArea(event.data.unitId);
           this.clearAttackableArea();
-
+          this.clearSkillRange();
           break;
+
         case GameEventType.PLAYER_ACTION_ATTACKED:
           this.currentMode = 'attack';
           this.showAttackableArea(event.data.unitId);
           this.clearMovableArea();
+          this.clearSkillRange();
           break;
-        case GameEventType.SKILL_USED:
+
+        case GameEventType.SKILL_TARGET_SELECT:
           this.currentMode = 'skill';
           this.selectedSkillId = event.data.skillId;
+          this.showSkillRange(event.data.unitId, event.data.skillId);
           this.clearMovableArea();
           this.clearAttackableArea();
           break;
+
         case GameEventType.PLAYER_ACTION_WAIT:
         case GameEventType.PLAYER_ACTION_CANCELLED:
           this.resetMode();
@@ -111,7 +116,7 @@ export class SceneInputHandler {
     } else if (this.currentMode === 'attack') {
       this.handleAttackClick(clickedUnit, currentPlayerId);
     } else if (this.currentMode === 'skill') {
-      this.handleSKillClick(x, y, clickedUnit, currentPlayerId);
+      this.handleSkillClick(x, y, clickedUnit, currentPlayerId);
     }
   }
 
@@ -148,7 +153,6 @@ export class SceneInputHandler {
         this.showMovableArea(clickedUnit.id);
         this.showAttackableArea(clickedUnit.id);
         console.log(`選擇單位: ${clickedUnit.name}`);
-        return;
       } else {
         console.log(`查看敵方單位: ${clickedUnit.name}`);
       }
@@ -197,15 +201,15 @@ export class SceneInputHandler {
   /**
    * 處理技能點擊（選擇目標）
    */
-  private handleSKillClick(
+  private handleSkillClick(
     x: number,
     y: number,
     clickedUnit: Unit | undefined,
     currentPlayerId: string
   ): void {
-    if (!this.selectedUnitId) return;
+    if (!this.selectedUnitId || !this.selectedSkillId) return;
 
-    const caster = this.gameService.getUnitById(this.selectedUnitId)!;
+    const caster = this.gameService.getUnitById(this.selectedUnitId);
     if (!caster) return;
 
     const skill = caster.skills.find(
@@ -214,7 +218,7 @@ export class SceneInputHandler {
     if (!skill) return;
 
     // 根據技能目標類型決定目標選擇
-    const targetType = skill.effects[0].targetType;
+    const targetType = skill.effects[0]?.targetType;
 
     // 收集可能的目標
     let targets: Unit[] = [];
@@ -364,12 +368,11 @@ export class SceneInputHandler {
 
       // 發送技能使用事件
       this.eventService.emit({
-        type: GameEventType.SKILL_USED,
+        type: GameEventType.SKILL_ACTIVATED,
         data: {
           unitId: caster.id,
           skillId: skill.id,
           targetIds: targets.map((t) => t.id),
-          selectingTarget: false,
         },
       });
 

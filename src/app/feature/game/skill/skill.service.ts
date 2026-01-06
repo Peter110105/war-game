@@ -111,14 +111,14 @@ export class SkillService {
     });
 
     // 發送技能使用事件
-    this.eventService.emit({
-      type: GameEventType.SKILL_USED,
-      data: {
-        unitId: caster.id,
-        skillId: skill.id,
-        targetIds: targets.map((t) => t.id),
-      },
-    });
+    // this.eventService.emit({
+    //   type: GameEventType.SKILL_USED,
+    //   data: {
+    //     unitId: caster.id,
+    //     skillId: skill.id,
+    //     targetIds: targets.map((t) => t.id),
+    //   },
+    // });
 
     return { success: true };
   }

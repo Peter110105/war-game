@@ -194,11 +194,10 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
 
         // 發送事件給 Phaser 顯示技能範圍
         this.eventService.emit({
-          type: GameEventType.SKILL_USED,
+          type: GameEventType.SKILL_TARGET_SELECT,
           data: {
             unitId: this.selectedUnit?.id,
             skillId: action.skillId,
-            selectingTarget: true,
           },
         });
         break;
@@ -280,6 +279,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
           this.hoveredUnit = null;
           this.currentMode = 'idle';
           break;
+
         case GameEventType.UNIT_HEALED:
           console.log('Unit healed:', event.data);
           break;
@@ -292,7 +292,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
           }
           break;
 
-        case GameEventType.SKILL_USED:
+        case GameEventType.SKILL_ACTIVATED:
           if (!event.data.selectingTarget) {
             console.log('✨ 技能使用:', event.data);
             this.showSkillMenu = false;
