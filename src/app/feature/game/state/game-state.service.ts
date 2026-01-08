@@ -10,6 +10,7 @@ import { Player } from '../model/player.model';
 import { GameStateFactory } from '../factory/game-state.factory';
 import { SkillEffectType } from '../model/skill.model';
 import { SkillService } from '../skill/skill.service';
+import { SkillProcessor } from '../skill/skill-processor';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateService {
@@ -19,6 +20,7 @@ export class GameStateService {
     private eventService: GameEventService,
     private movementProcessor: MovementProcessor,
     private combatProcessor: CombatProcessor,
+    private skillProcessor: SkillProcessor,
     private gameStateLoaderService: GameStateLoaderService,
     private gameStateFactory: GameStateFactory,
     private skillService: SkillService
@@ -172,7 +174,9 @@ export class GameStateService {
     if (cmd.type === 'ATTACK') {
       return this.combatProcessor.execute(this.state, cmd);
     }
-
+    if (cmd.type === 'SKILL') {
+      return this.skillProcessor.execute(this.state, cmd);
+    }
     if (cmd.type === 'END_TURN') {
       // 1. 檢查是否輪到該玩家
       if (cmd.playerId !== this.getCurrentPlayer().id) {

@@ -1,4 +1,6 @@
-export type CommandType = 'MOVE' | 'ATTACK' | 'END_TURN';
+import { TargetType } from '../model/skill.model';
+
+export type CommandType = 'MOVE' | 'ATTACK' | 'SKILL' | 'END_TURN';
 
 export interface BaseCommand {
   id: string;
@@ -27,4 +29,17 @@ export interface AttackCommand extends BaseCommand {
   to: { x: number; y: number };
 }
 
-export type GameCommand = MoveCommand | AttackCommand| EndTurnCommand;
+export interface SkillCommand extends BaseCommand {
+  type: 'SKILL';
+  unitId: string; // 施法者
+  skillId: string; // 技能ID
+  // targetType: TargetType; // 目標類型
+  targetPosition?: { x: number; y: number }; // 目標位置（地格技能）
+  // targetRange?: number; // 範圍半徑（範圍技能）
+}
+
+export type GameCommand =
+  | MoveCommand
+  | AttackCommand
+  | SkillCommand
+  | EndTurnCommand;

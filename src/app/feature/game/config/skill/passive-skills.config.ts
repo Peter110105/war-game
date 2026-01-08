@@ -17,6 +17,7 @@ export const PASSIVE_SKILLS: Record<string, Skill> = {
     description: '攻擊力 +30%，防禦力 -10%',
     type: SkillType.PASSIVE,
     trigger: TriggerTiming.ALWAYS,
+    range: 0,
     effects: [
       {
         effectType: SkillEffectType.ATTACK_BOOST,
@@ -38,6 +39,7 @@ export const PASSIVE_SKILLS: Record<string, Skill> = {
     description: '防禦力 +40%，移動力 -1',
     type: SkillType.PASSIVE,
     trigger: TriggerTiming.ALWAYS,
+    range: 0,
     effects: [
       {
         effectType: SkillEffectType.DEFENSE_BOOST,
@@ -59,6 +61,7 @@ export const PASSIVE_SKILLS: Record<string, Skill> = {
     description: '15% 機率暴擊並無視 50% 防禦',
     type: SkillType.PASSIVE,
     trigger: TriggerTiming.ON_ATTACK,
+    range: 0,
     effects: [
       {
         effectType: SkillEffectType.CRITICAL_HIT,
@@ -82,12 +85,12 @@ export const PASSIVE_SKILLS: Record<string, Skill> = {
     description: '受到近戰攻擊時反擊並恢復 20% 造成傷害的生命',
     type: SkillType.PASSIVE,
     trigger: TriggerTiming.ON_DEFEND,
+    range: 1,
     effects: [
       {
         effectType: SkillEffectType.COUNTER_ATTACK,
         value: 1.0,
         targetType: TargetType.ENEMY,
-        range: 1,
       },
       {
         effectType: SkillEffectType.LIFE_STEAL,
@@ -104,6 +107,7 @@ export const PASSIVE_SKILLS: Record<string, Skill> = {
     description: '移動力 +1，忽略地形移動消耗',
     type: SkillType.PASSIVE,
     trigger: TriggerTiming.ALWAYS,
+    range: 0,
     effects: [
       {
         effectType: SkillEffectType.MOVE_BOOST,
@@ -125,6 +129,7 @@ export const PASSIVE_SKILLS: Record<string, Skill> = {
     description: '移動力 +2，總是先制攻擊',
     type: SkillType.PASSIVE,
     trigger: TriggerTiming.ALWAYS,
+    range: 0,
     effects: [
       {
         effectType: SkillEffectType.MOVE_BOOST,
@@ -146,6 +151,7 @@ export const PASSIVE_SKILLS: Record<string, Skill> = {
     description: '每回合恢復 10% 最大生命值',
     type: SkillType.PASSIVE,
     trigger: TriggerTiming.ON_TURN_START,
+    range: 0,
     effects: [
       {
         effectType: SkillEffectType.REGENERATION,
@@ -162,6 +168,7 @@ export const PASSIVE_SKILLS: Record<string, Skill> = {
     description: '攻擊力 +15%，偷取 30% 造成傷害的生命',
     type: SkillType.PASSIVE,
     trigger: TriggerTiming.ON_ATTACK,
+    range: 0,
     effects: [
       {
         effectType: SkillEffectType.ATTACK_BOOST,

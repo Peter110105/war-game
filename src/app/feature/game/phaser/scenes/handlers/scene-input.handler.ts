@@ -316,7 +316,7 @@ export class SceneInputHandler {
       id: 'cmd_' + Date.now(),
       type: 'ATTACK',
       playerId: this.gameService.currentPlayerId,
-      unitId: this.selectedUnitId!,
+      unitId: attacker.id,
       targetId: defender.id,
       from: { x: attacker.x, y: attacker.y },
       to: { x: defender.x, y: defender.y },
@@ -354,28 +354,24 @@ export class SceneInputHandler {
   /**
    * 執行技能
    */
-  private executeSkill(caster: Unit, skillId: string, targets: Unit[]): void {
-    const skill = caster.skills.find((s) => s.id === skillId);
-    if (!skill) return;
+  private executeSkill(
+    caster: Unit,
+    skillId: string,
+    targetPosition: any
+  ): void {
+    const cmd: GameCommand = {
+      id: 'cmd_' + Date.now(),
+      type: 'SKILL',
+      playerId: this.gameService.currentPlayerId,
+      unitId: caster.id,
+      skillId: skillId,
+      targetPosition: { x: targetPosition.x, y: targetPosition.y },
+    };
 
-    const result = this.skillService.useSkill(caster, skill, targets);
+    const result = this.gameService.execute(cmd);
 
     if (result.success) {
-      console.log(`✨ ${caster.name} 使用了 ${skill.name}`);
-
-      // 標記已使用技能（視為攻擊動作）
-      caster.actionState.hasAttacked = true;
-
-      // 發送技能使用事件
-      this.eventService.emit({
-        type: GameEventType.SKILL_ACTIVATED,
-        data: {
-          unitId: caster.id,
-          skillId: skill.id,
-          targetIds: targets.map((t) => t.id),
-        },
-      });
-
+      console.log(`${caster.name} 使用了技能`);
       this.clearAllAreas();
       this.resetMode();
     } else {
@@ -451,7 +447,7 @@ export class SceneInputHandler {
     if (!skill) return;
 
     // 獲取技能的射程
-    const range = skill.effects[0]?.range || 1;
+    const range = skill.range || 1;
 
     // 計算範圍內的所有格子
     const rangeArea: { x: number; y: number }[] = [];

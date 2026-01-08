@@ -709,8 +709,8 @@
     },
     {
       "id": "E1",
-      "name": "敵方步兵",
-      "type": "soldier",
+      "name": "敵方飛兵",
+      "type": "FLYER",
       "ownerId": "P2",
       "x": 1,
       "y": 2,
@@ -729,8 +729,8 @@
     },
     {
       "id": "E2",
-      "name": "敵方弓兵",
-      "type": "archer",
+      "name": "敵方騎兵",
+      "type": "KNIGHT",
       "ownerId": "P2",
       "x": 1,
       "y": 3,

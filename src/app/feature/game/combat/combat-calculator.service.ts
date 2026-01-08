@@ -180,14 +180,14 @@ export class CombatCalculator {
     const counterSkill = defender.skills.find((skill) =>
       skill.effects.some((e) => e.effectType === SkillEffectType.COUNTER_ATTACK)
     );
-
-    if (counterSkill) {
-      const counterEffect = counterSkill.effects.find(
-        (e) => e.effectType === SkillEffectType.COUNTER_ATTACK
-      );
-      const counterRange = counterEffect?.range || 1;
-      return distance <= counterRange;
-    }
+    // FIXME 帶修正
+    // if (counterSkill) {
+    //   const counterEffect = counterSkill.effects.find(
+    //     (e) => e.effectType === SkillEffectType.COUNTER_ATTACK
+    //   );
+    //   const counterRange = counterEffect?.range || 1;
+    //   return distance <= counterRange;
+    // }
 
     return distance <= 1;
   }

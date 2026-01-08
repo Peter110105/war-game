@@ -67,14 +67,22 @@ export enum SkillEffectType {
  * 目標類型
  */
 export enum TargetType {
-  SELF = 'SELF', // 自己
-  ALLY = 'ALLY', // 友軍單位
-  ALLY_ALL = 'ALLY_ALL', // 所有友軍
-  ENEMY = 'ENEMY', // 敵方單位
-  ENEMY_ALL = 'ENEMY_ALL', // 所有敵方
-  ANY = 'ANY', // 任意單位
-  AREA = 'AREA', // 範圍內所有單位
-  TILE = 'TILE', // 地格
+  /** 自己 */
+  SELF = 'SELF',
+  /** 友軍單位 */
+  ALLY = 'ALLY',
+  /** 所有友軍 */
+  ALLY_ALL = 'ALLY_ALL',
+  /** 敵方單位 */
+  ENEMY = 'ENEMY',
+  /** 所有敵方 */
+  ENEMY_ALL = 'ENEMY_ALL',
+  /** 任意單位 */
+  ANY = 'ANY',
+  /** 範圍內所有單位 */
+  AREA = 'AREA',
+  /** 地格 */
+  TILE = 'TILE',
 }
 
 /**
@@ -117,8 +125,7 @@ export interface SkillEffect {
   chance?: number;
   /** 目標類型 */
   targetType: TargetType;
-  /** 效果範圍 */
-  range?: number;
+
   /** 觸發條件 */
   condition?: SkillCondition;
 }
@@ -157,6 +164,9 @@ export interface Skill {
 
   /** 技能觸發時機 */
   trigger: TriggerTiming;
+
+  /** 技能範圍 */
+  range: number;
 
   // 主動技能相關
   /** 冷卻回合數 */
