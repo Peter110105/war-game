@@ -49,36 +49,28 @@ ng test
 src/
 ├─ app/
 │   ├─ core/
-│   │  ├─ guards/                     # 路由守衛 (未來使用)
-│   │  ├─ interceptors/               # HTTP 攔截器 (未來使用)
+│   │  ├─ guards/                     # //TODO 路由守衛
+│   │  ├─ interceptors/               # //TODO HTTP 攔截器
 │   │  └─ services/
 │   │     └─ game-state-loader.service.ts
 │   │
 │   ├─ feature/
 │   │  └─ game/
 │   │     │
-│   │     ├─ ai/                      # AI 系統 (為 v0.8.0 準備)  //TODO
-│   │     │  ├─ ai-controller.service.ts     # AI 控制器
-│   │     │  ├─ ai-evaluator.service.ts      # 局面評估
-│   │     │  └─ ai-strategy/                 # AI 策略
-│   │     │     ├─ basic-ai.strategy.ts
-│   │     │     ├─ medium-ai.strategy.ts
-│   │     │     └─ hard-ai.strategy.ts
+│   │     ├─ core/
+│   │     │  ├─ command/
+│   │     │  │  ├─ command.interface.ts
+│   │     │  │  └─ command-factory.ts           # //TODO 命令工廠
+│   │     │  └─ state/                   # //TODO 狀態管理重組
+│   │     │     ├─ game-state.service.ts       # 核心狀態
+│   │     │     ├─ turn-manager.service.ts     # 回合管理
+│   │     │     ├─ unit-query.service.ts       # 單位查詢
+│   │     │     └─ game-event.service.ts       # 事件總線
 │   │     │
-│   │     ├─ combat/                  # 重組：戰鬥系統模組化 //TODO
-│   │     │  ├─ combat-processor.ts          # 命令處理
-│   │     │  ├─ combat-calculator.service.ts # 傷害計算
-│   │     │  ├─ combat-executor.service.ts   # 戰鬥執行
-│   │     │  └─ combat-validator.service.ts  # 攻擊驗證
-│   │     │
-│   │     ├─ command/
-│   │     │  ├─ command.interface.ts
-│   │     │  └─ command-factory.ts           # 命令工廠 (未來)  //TODO
-│   │     │
-│   │     ├─ config/                  # 重組：配置模組化  //TODO
+│   │     ├─ config/                  # 配置模組
 │   │     │  ├─ game/
 │   │     │  │  ├─ game.config.ts           # 基礎配置
-│   │     │  │  └─ visual.config.ts         # 視覺配置 (顏色、動畫時間) //TODO
+│   │     │  │  └─ visual.config.ts         # //TODO 視覺配置 (顏色、動畫時間)
 │   │     │  │
 │   │     │  ├─ skill/
 │   │     │  │  ├─ passive-skills.config.ts # 被動技能
@@ -95,28 +87,18 @@ src/
 │   │     │     ├─ exp.config.ts            # 經驗值配置
 │   │     │     └─ index.ts                 # 統一導出
 │   │     │
-│   │     ├─ factory/               
+│   │     ├─ factory/
 │   │     │  ├─ game-state.factory.ts
-│   │     │  └─ unit.factory.ts             # 單位工廠 (未來) //TODO
+│   │     │  └─ unit.factory.ts             # //TODO 單位工廠
 │   │     │
-│   │     ├─ level/                   # 關卡系統 (為 v0.7.0 準備) //TODO
-│   │     │  ├─ level-loader.service.ts       # 關卡載入
-│   │     │  ├─ level-validator.service.ts    # 關卡驗證
-│   │     │  └─ victory-condition.service.ts  # 勝利條件
-│   │     │
-│   │     ├─ model/                   
+│   │     ├─ model/
 │   │     │  ├─ game-state.model.ts
 │   │     │  ├─ player.model.ts
 │   │     │  ├─ tile.model.ts
 │   │     │  ├─ unit.model.ts
 │   │     │  └─ skill.model.ts
 │   │     │
-│   │     ├─ movement/                # 移動系統模組化
-│   │     │  ├─ movement-processor.ts         # 命令處理
-│   │     │  ├─ path-finding.service.ts       # 尋路算法
-│   │     │  └─ movement-validator.service.ts # 移動驗證 //TODO
-│   │     │
-│   │     ├─ phaser/                  # Phaser 層重組 //TODO
+│   │     ├─ phaser/                  # //TODO Phaser 層重組
 │   │     │  ├─ config/
 │   │     │  │  └─ phaser.config.ts
 │   │     │  │
@@ -128,7 +110,7 @@ src/
 │   │     │  │  │  ├─ terrain-renderer.manager.ts
 │   │     │  │  │  ├─ hp-bar.manager.ts
 │   │     │  │  │  └─ effect-renderer.manager.ts
-│   │     │  │  └─ ui/                     # UI 管理器分組 //TODO
+│   │     │  │  └─ ui/                     # //TODO UI 管理器分組
 │   │     │  │     ├─ tooltip.manager.ts     # 提示框管理
 │   │     │  │     └─ damage-text.manager.ts # 傷害數字管理
 │   │     │  │
@@ -138,21 +120,36 @@ src/
 │   │     │     │  ├─ scene-event.handler.ts    # 事件處理
 │   │     │     │  ├─ scene-input.handler.ts    # 輸入處理
 │   │     │     │  └─ scene-visual.handler.ts   # 視覺效果
-│   │     │     └─ ui-overlay.scene.ts    # UI 覆蓋層 (未來) //TODO
+│   │     │     └─ ui-overlay.scene.ts    # //TODO UI 覆蓋層 (未來)
 │   │     │
-│   │     ├─ skill/                   # 技能系統模組化 //TODO
-│   │     │  ├─ skill.service.ts            # 核心服務
-│   │     │  ├─ skill-effect.service.ts     # 效果應用
-│   │     │  ├─ skill-condition.service.ts  # 條件檢查
-│   │     │  └─ skill-cooldown.service.ts   # 冷卻管理
+│   │     ├─ system/
+│   │     │     ├─ ai/                      # //TODO AI 系統 (為 v0.8.0 準備)
+│   │     │     │  ├─ ai-controller.service.ts     # AI 控制器
+│   │     │     │  ├─ ai-evaluator.service.ts      # 局面評估
+│   │     │     │  └─ ai-strategy/                 # AI 策略
+│   │     │     │     ├─ basic-ai.strategy.ts
+│   │     │     │     ├─ medium-ai.strategy.ts
+│   │     │     │     └─ hard-ai.strategy.ts
+│   │     │     ├─ combat/                  # //TODO 重組：戰鬥系統模組化
+│   │     │     │  ├─ combat-processor.ts          # 命令處理
+│   │     │     │  ├─ combat-calculator.service.ts # 傷害計算
+│   │     │     │  ├─ combat-executor.service.ts   # 戰鬥執行
+│   │     │     │  └─ combat-validator.service.ts  # 攻擊驗證
+│   │     │     ├─ level/                   # //TODO 關卡系統 (為 v0.7.0 準備)
+│   │     │     │  ├─ level-loader.service.ts       # //TODO 關卡載入
+│   │     │     │  ├─ level-validator.service.ts    # //TODO 關卡驗證
+│   │     │     │  └─ victory-condition.service.ts  # //TODO 勝利條件
+│   │     │     ├─ movement/                # 移動系統模組化
+│   │     │     │  ├─ movement-processor.ts         # 命令處理
+│   │     │     │  ├─ path-finding.service.ts       # 尋路算法
+│   │     │     │  └─ movement-validator.service.ts # //TODO 移動驗證
+│   │     │     └─ skill/                   # //TODO 技能系統模組化
+│   │     │        ├─ skill.service.ts            # 核心服務
+│   │     │        ├─ skill-effect.service.ts     # 效果應用
+│   │     │        ├─ skill-condition.service.ts  # 條件檢查
+│   │     │        └─ skill-cooldown.service.ts   # 冷卻管理
 │   │     │
-│   │     ├─ state/                   # 狀態管理重組 //TODO
-│   │     │  ├─ game-state.service.ts       # 核心狀態
-│   │     │  ├─ turn-manager.service.ts     # 回合管理
-│   │     │  ├─ unit-query.service.ts       # 單位查詢
-│   │     │  └─ game-event.service.ts       # 事件總線
-│   │     │
-│   │     └─ unit/                    # 單位系統模組化 //TODO
+│   │     └─ unit/                    # //TODO 單位系統模組化
 │   │        ├─ unit-level.service.ts       # 經驗升級
 │   │        └─ unit-state.service.ts       # 單位狀態管理
 │   │
@@ -168,13 +165,13 @@ src/
 │   │        ├─ game-result-modal/
 │   │        └─ level-up-animation/
 │   │
-│   ├─ shared/                        # 共用層擴充 //TODO
+│   ├─ shared/                        # //TODO共用層擴充
 │   │  ├─ components/                 # 共用元件 (未來)
 │   │  ├─ directives/                 # 共用指令 (未來)
 │   │  ├─ pipes/                      # 共用管道 (未來)
 │   │  ├─ models/                     # 共用模型 (未來)
 │   │  └─ utils/ //TODO
-│   │     ├─ math.helper.ts           # 數學工具 
+│   │     ├─ math.helper.ts           # 數學工具
 │   │     ├─ format.helper.ts         # 格式化工具
 │   │     └─ game.helper.ts           # 遊戲工具
 │   │
@@ -193,12 +190,12 @@ src/
 │   │  │  └─ stage-02.json
 │   │  └─ initial-game-state.json
 │   │
-│   ├─ images/                        # 圖片資源 (未來)
+│   ├─ images/                        # //TODO 圖片資源
 │   │  ├─ units/
 │   │  ├─ terrain/
 │   │  └─ ui/
 │   │
-│   └─ sounds/                        # 音效資源 (未來)
+│   └─ sounds/                        # //TODO 音效資源
 │      ├─ bgm/
 │      └─ sfx/
 │
