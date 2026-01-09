@@ -1,6 +1,6 @@
 import { Skill } from '../../model/skill.model';
-import { PASSIVE_SKILLS } from './passive-skills.config';
-import { ACTIVE_SKILLS } from './active-skills.config';
+import { PASSIVE_SKILLS } from './passive-skill.config';
+import { ACTIVE_SKILLS } from './active-skill.config';
 
 /**
  * 技能註冊表 - 統一管理所有技能

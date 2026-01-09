@@ -1,3 +1,3 @@
-export * from './passive-skills.config';
-export * from './active-skills.config';
+export * from './passive-skill.config';
+export * from './active-skill.config';
 export * from './skill-registry';
