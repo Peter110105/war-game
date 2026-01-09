@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
-import { GameState } from '../model/game-state.model';
-import { GameCommand, MoveCommand } from '../command/command.interface';
-import { GameEventService, GameEventType } from '../state/game-event.service';
+import { GameState } from '../../model/game-state.model';
+import { GameCommand, MoveCommand } from '../../core/command/command.interface';
+import {
+  GameEventService,
+  GameEventType,
+} from '../../core/state/game-event.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class MovementProcessor {
-  constructor(private eventService: GameEventService) {}
+export class MovementProcessorService {
+  constructor(private gameEventService: GameEventService) {}
 
   private dist(
     unit: { x: number; y: number },
@@ -59,7 +62,7 @@ export class MovementProcessor {
     unit.actionState.canMoved = false;
 
     // 發送攻擊事件 (用於更新血條)
-    this.eventService.emit({
+    this.gameEventService.emit({
       type: GameEventType.UNIT_MOVED,
       data: {
         unitId: unit.id,

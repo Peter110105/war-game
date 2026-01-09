@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
+import { getTerrainConfig } from '../config/terrain/terrain.config';
+import { getExpToNextLevel, getUnitConfig } from '../config/unit';
 import { Unit, UnitType } from '../model/unit.model';
 import { Player } from '../model/player.model';
 import { GameState } from '../model/game-state.model';
 import { TerrainType, Tile } from '../model/tile.model';
-import { getTerrainConfig } from '../config/terrain/terrain.config';
-import { getExpToNextLevel, getUnitConfig } from '../config/unit';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateFactory {

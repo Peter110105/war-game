@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
-import { GameCommand } from '../command/command.interface';
-import { GameState } from '../model/game-state.model';
-import { CombatCalculator } from '../combat/combat-calculator.service';
-import { GameEventService, GameEventType } from '../state/game-event.service';
-import { UnitLevelService } from '../unit/unit-level.service';
-import { Unit } from '../model/unit.model';
-import { TriggerTiming } from '../model/skill.model';
+import { GameCommand } from '../../core/command/command.interface';
+import { GameState } from '../../model/game-state.model';
+import { CombatCalculatorService } from './combat-calculator.service';
+import {
+  GameEventService,
+  GameEventType,
+} from '../../core/state/game-event.service';
+import { UnitLevelService } from '../level/unit-level.service';
+import { Unit } from '../../model/unit.model';
+import { TriggerTiming } from '../../model/skill.model';
 
 export interface CombatResult {
   success: boolean;
@@ -26,10 +29,10 @@ export interface CombatResult {
 @Injectable({
   providedIn: 'root',
 })
-export class CombatProcessor {
+export class CombatProcessorService {
   constructor(
-    private eventService: GameEventService,
-    private combatCalculator: CombatCalculator,
+    private gameEventService: GameEventService,
+    private combatCalculator: CombatCalculatorService,
     private levelService: UnitLevelService
   ) {}
 
@@ -75,7 +78,7 @@ export class CombatProcessor {
 
     // 發送攻擊事件 (用於更新血條)
     attacker.actionState.canAttacked = false;
-    this.eventService.emit({
+    this.gameEventService.emit({
       type: GameEventType.UNIT_ATTACKED,
       data: {
         unitId: attacker.id,
@@ -314,7 +317,7 @@ export class CombatProcessor {
     this.levelService.addExp(killer, killExp);
 
     // 發送死亡事件
-    this.eventService.emit({
+    this.gameEventService.emit({
       type: GameEventType.UNIT_DIED,
       data: {
         unitId: deadUnit.id,

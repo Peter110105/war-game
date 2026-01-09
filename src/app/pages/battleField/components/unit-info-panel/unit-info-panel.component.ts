@@ -5,8 +5,10 @@ import {
   SkillEffectType,
   SkillType,
 } from '../../../../feature/game/model/skill.model';
-import { SkillService } from '../../../../feature/game/skill/skill.service';
-import { UnitLevelService } from '../../../../feature/game/unit/unit-level.service';
+import {
+  SkillService,
+  UnitLevelService,
+} from '../../../../feature/game/system';
 
 @Component({
   selector: 'app-unit-info-panel',

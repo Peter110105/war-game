@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_CONFIG } from '../../../config/game/game.config';
-import { GameStateService } from '../../../state/game-state.service';
+import { GameStateService } from '../../../core/state/game-state.service';
 
 /**
  * 場景視覺效果處理器
@@ -9,7 +9,7 @@ import { GameStateService } from '../../../state/game-state.service';
 export class SceneVisualHandler {
   constructor(
     private scene: Phaser.Scene,
-    private gameService: GameStateService
+    private gameStateService: GameStateService
   ) {}
 
   /**
@@ -122,7 +122,7 @@ export class SceneVisualHandler {
    * 顯示升級效果
    */
   public showLevelUpEffect(unitId: string) {
-    const unit = this.gameService.getUnitById(unitId);
+    const unit = this.gameStateService.getUnitById(unitId);
     if (!unit) return;
 
     const pixelX = unit.x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;
@@ -166,7 +166,7 @@ export class SceneVisualHandler {
    * 顯示技能效果
    */
   public showSkillEffect(unitId: string, skillId: string) {
-    const unit = this.gameService.getUnitById(unitId);
+    const unit = this.gameStateService.getUnitById(unitId);
     if (!unit) return;
 
     const pixelX = unit.x * GAME_CONFIG.TILE_SIZE + GAME_CONFIG.TILE_SIZE / 2;

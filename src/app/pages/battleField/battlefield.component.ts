@@ -1,3 +1,5 @@
+import { Subscription } from 'rxjs';
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -5,25 +7,25 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { GameStateService } from '../../feature/game/state/game-state.service';
-import { PHASER_CONFIG } from '../../feature/game/phaser/config/phaser-config';
-import { Subscription } from 'rxjs';
 import {
   GameEventService,
   GameEventType,
-} from '../../feature/game/state/game-event.service';
-import { PathfindingService } from '../../feature/game/movement/path-finding.service';
+} from '../../feature/game/core/state/game-event.service';
+import { GameStateService } from '../../feature/game/core/state/game-state.service';
+import { GameCommand } from '../../feature/game/core/command/command.interface';
+import { PHASER_CONFIG } from '../../feature/game/phaser/config/phaser-config';
+import {
+  VictoryService,
+  SkillService,
+  PathfindingService,
+} from '../../feature/game/system';
 import { Unit } from '../../feature/game/model/unit.model';
-import { GameCommand } from '../../feature/game/command/command.interface';
-import { CommonModule } from '@angular/common';
 import {
   ActionMenuComponent,
   ActionType,
 } from './components/action-menu/action-menu.component';
 import { UnitInfoPanelComponent } from './components/unit-info-panel/unit-info-panel.component';
 import { GameResultModalComponent } from './components/game-result-modal/game-result-modal.component';
-import { VictoryService } from '../../feature/game/level/victory.service';
-import { SkillService } from '../../feature/game/skill/skill.service';
 import {
   SkillMenuComponent,
   SkillMenuAction,
@@ -65,19 +67,19 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
   victoryReason = '';
 
   constructor(
-    private gameService: GameStateService,
-    private eventService: GameEventService,
+    private gameStateService: GameStateService,
+    private gameEventService: GameEventService,
     private pathfindingService: PathfindingService,
     private victoryService: VictoryService,
     private skillService: SkillService
   ) {}
 
   get currentPlayer() {
-    return this.gameService.getCurrentPlayer();
+    return this.gameStateService.getCurrentPlayer();
   }
 
   get gameState() {
-    return this.gameService.getGameState();
+    return this.gameStateService.getGameState();
   }
 
   ngOnInit() {
@@ -91,7 +93,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
   }
 
   public isCurrentPlayer(): boolean {
-    return this.gameService.currentPlayerId === this.currentPlayer?.id;
+    return this.gameStateService.currentPlayerId === this.currentPlayer?.id;
   }
 
   public endTurn() {
@@ -102,7 +104,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
       timestamp: Date.now(),
     };
 
-    const result = this.gameService.execute(cmd);
+    const result = this.gameStateService.execute(cmd);
     console.log(result);
 
     // 關閉選單
@@ -123,7 +125,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
         this.showActionMenu = false;
 
         // 發送事件給 Phaser,只顯示移動範圍
-        this.eventService.emit({
+        this.gameEventService.emit({
           type: GameEventType.PLAYER_ACTION_MOVED,
           data: { unitId: this.selectedUnit?.id },
         });
@@ -134,7 +136,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
         this.showActionMenu = false;
 
         // 發送事件給 Phaser,只顯示攻擊範圍
-        this.eventService.emit({
+        this.gameEventService.emit({
           type: GameEventType.PLAYER_ACTION_ATTACKED,
           data: { unitId: this.selectedUnit?.id },
         });
@@ -152,7 +154,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
           this.selectedUnit.actionState.canAct = false;
         }
 
-        this.eventService.emit({
+        this.gameEventService.emit({
           type: GameEventType.PLAYER_ACTION_WAIT,
           data: { unitId: this.selectedUnit?.id },
         });
@@ -163,7 +165,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
         break;
       case 'cancel':
         // 取消選擇
-        this.eventService.emit({
+        this.gameEventService.emit({
           type: GameEventType.PLAYER_ACTION_CANCELLED,
           data: { unitId: this.selectedUnit?.id },
         });
@@ -193,7 +195,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
         this.showSkillMenu = false;
 
         // 發送事件給 Phaser 顯示技能範圍
-        this.eventService.emit({
+        this.gameEventService.emit({
           type: GameEventType.SKILL_TARGET_SELECT,
           data: {
             unitId: this.selectedUnit?.id,
@@ -211,111 +213,120 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
     };
     this.game = new Phaser.Game(config);
     this.game.scene.start('BattlefieldScene', {
-      gameService: this.gameService,
-      eventService: this.eventService,
+      gameStateService: this.gameStateService,
+      gameEventService: this.gameEventService,
       pathfindingService: this.pathfindingService,
       skillService: this.skillService,
     });
   }
 
   private subscribeToGameEvents() {
-    this.eventSubscription = this.eventService.events$.subscribe((event) => {
-      switch (event.type) {
-        case GameEventType.UNIT_SELECTED:
-          const unit = this.gameService.getUnitAt(event.data.x, event.data.y);
-          if (unit) {
-            this.hoveredUnit = unit;
-            if (unit.ownerId === this.gameService.currentPlayerId) {
-              this.selectedUnit = unit;
-              // 計算選單位置 (單位右側)
-              this.menuPosition = {
-                x: event.data.x * 64 + 80,
-                y: event.data.y * 64,
-              };
-              this.showActionMenu = true;
-              this.showSkillMenu = false;
-            } else {
-              this.selectedUnit = null;
-              this.showActionMenu = false;
-              this.showSkillMenu = false;
+    this.eventSubscription = this.gameEventService.events$.subscribe(
+      (event) => {
+        switch (event.type) {
+          case GameEventType.UNIT_SELECTED:
+            const unit = this.gameStateService.getUnitAt(
+              event.data.x,
+              event.data.y
+            );
+            if (unit) {
+              this.hoveredUnit = unit;
+              if (unit.ownerId === this.gameStateService.currentPlayerId) {
+                this.selectedUnit = unit;
+                // 計算選單位置 (單位右側)
+                this.menuPosition = {
+                  x: event.data.x * 64 + 80,
+                  y: event.data.y * 64,
+                };
+                this.showActionMenu = true;
+                this.showSkillMenu = false;
+              } else {
+                this.selectedUnit = null;
+                this.showActionMenu = false;
+                this.showSkillMenu = false;
+              }
             }
-          }
-          console.log('Unit selected:', this.selectedUnit?.name);
-          break;
+            console.log('Unit selected:', this.selectedUnit?.name);
+            break;
 
-        case GameEventType.UNIT_MOVED:
-          console.log('Unit moved:', event.data);
-          this.showActionMenu = false;
-          this.showSkillMenu = false;
-          this.selectedUnit = null;
-          this.hoveredUnit = null;
-          this.currentMode = 'idle';
-          break;
-
-        case GameEventType.UNIT_ATTACKED:
-          console.log('Unit attacked:', event.data);
-          // 顯示戰鬥結果訊息
-          if (event.data.isCritical) {
-            console.log('💥 暴擊！');
-          }
-          if (event.data.evaded) {
-            console.log('💨 閃避！');
-          }
-          if (event.data.isCounterAttack) {
-            console.log('↩️ 反擊！');
-          }
-          if (event.data.reflectDamage && event.data.reflectDamage > 0) {
-            console.log(`⚡ 反傷 ${event.data.reflectDamage} 點傷害！`);
-          }
-          if (
-            event.data.attackerLifeSteal &&
-            event.data.attackerLifeSteal > 0
-          ) {
-            console.log(`🩸 吸血 ${event.data.attackerLifeSteal} HP！`);
-          }
-          this.showActionMenu = false;
-          this.showSkillMenu = false;
-          this.selectedUnit = null;
-          this.hoveredUnit = null;
-          this.currentMode = 'idle';
-          break;
-
-        case GameEventType.UNIT_HEALED:
-          console.log('Unit healed:', event.data);
-          break;
-
-        case GameEventType.UNIT_LEVEL_UP:
-          console.log('🎉 Unit leveled up:', event.data);
-          const leveledUnit = this.gameService.getUnitById(event.data.unitId);
-          if (leveledUnit) {
-            console.log(`${leveledUnit.name} 升級到 Lv.${event.data.level}！`);
-          }
-          break;
-
-        case GameEventType.SKILL_ACTIVATED:
-          if (!event.data.selectingTarget) {
-            console.log('✨ 技能使用:', event.data);
+          case GameEventType.UNIT_MOVED:
+            console.log('Unit moved:', event.data);
+            this.showActionMenu = false;
             this.showSkillMenu = false;
-            this.selectedSkillId = null;
             this.selectedUnit = null;
+            this.hoveredUnit = null;
             this.currentMode = 'idle';
-          }
-          break;
+            break;
 
-        case GameEventType.TURN_ENDED:
-          console.log('Turn ended:', event.data);
-          this.showActionMenu = false;
-          this.showSkillMenu = false;
-          this.selectedUnit = null;
-          this.hoveredUnit = null;
-          this.currentMode = 'idle';
-          break;
+          case GameEventType.UNIT_ATTACKED:
+            console.log('Unit attacked:', event.data);
+            // 顯示戰鬥結果訊息
+            if (event.data.isCritical) {
+              console.log('💥 暴擊！');
+            }
+            if (event.data.evaded) {
+              console.log('💨 閃避！');
+            }
+            if (event.data.isCounterAttack) {
+              console.log('↩️ 反擊！');
+            }
+            if (event.data.reflectDamage && event.data.reflectDamage > 0) {
+              console.log(`⚡ 反傷 ${event.data.reflectDamage} 點傷害！`);
+            }
+            if (
+              event.data.attackerLifeSteal &&
+              event.data.attackerLifeSteal > 0
+            ) {
+              console.log(`🩸 吸血 ${event.data.attackerLifeSteal} HP！`);
+            }
+            this.showActionMenu = false;
+            this.showSkillMenu = false;
+            this.selectedUnit = null;
+            this.hoveredUnit = null;
+            this.currentMode = 'idle';
+            break;
 
-        case GameEventType.UNIT_DIED:
-          this.checkGameOver();
-          break;
+          case GameEventType.UNIT_HEALED:
+            console.log('Unit healed:', event.data);
+            break;
+
+          case GameEventType.UNIT_LEVEL_UP:
+            console.log('🎉 Unit leveled up:', event.data);
+            const leveledUnit = this.gameStateService.getUnitById(
+              event.data.unitId
+            );
+            if (leveledUnit) {
+              console.log(
+                `${leveledUnit.name} 升級到 Lv.${event.data.level}！`
+              );
+            }
+            break;
+
+          case GameEventType.SKILL_ACTIVATED:
+            if (!event.data.selectingTarget) {
+              console.log('✨ 技能使用:', event.data);
+              this.showSkillMenu = false;
+              this.selectedSkillId = null;
+              this.selectedUnit = null;
+              this.currentMode = 'idle';
+            }
+            break;
+
+          case GameEventType.TURN_ENDED:
+            console.log('Turn ended:', event.data);
+            this.showActionMenu = false;
+            this.showSkillMenu = false;
+            this.selectedUnit = null;
+            this.hoveredUnit = null;
+            this.currentMode = 'idle';
+            break;
+
+          case GameEventType.UNIT_DIED:
+            this.checkGameOver();
+            break;
+        }
       }
-    });
+    );
   }
 
   /**
@@ -323,7 +334,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
    */
   private checkGameOver(): void {
     const result = this.victoryService.checkVictory(
-      this.gameService.getGameState()
+      this.gameStateService.getGameState()
     );
 
     if (result.isGameOver) {
@@ -334,7 +345,7 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
         this.victoryReason = result.reason || '';
 
         // 判斷當前玩家是否勝利
-        const currentPlayerId = this.gameService.currentPlayerId;
+        const currentPlayerId = this.gameStateService.currentPlayerId;
         this.isVictory = this.winner === currentPlayerId;
       }, 1000);
     }

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { GameState } from '../../../model/game-state.model';
 import { GAME_CONFIG } from '../../../config/game/game.config';
+import { GameState } from '../../../model/game-state.model';
 
 /**
  * 單位管理員

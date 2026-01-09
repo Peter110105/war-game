@@ -1,20 +1,19 @@
 import Phaser from 'phaser';
 import { Subscription } from 'rxjs';
-import { GameStateService } from '../../../state/game-state.service';
+import { GAME_CONFIG } from '../../../config/game/game.config';
+import { GameStateService } from '../../../core/state/game-state.service';
 import {
   GameEventService,
   GameEventType,
-} from '../../../state/game-event.service';
-import { PathfindingService } from '../../../movement/path-finding.service';
-import { GameCommand } from '../../../command/command.interface';
+} from '../../../core/state/game-event.service';
+import { GameCommand } from '../../../core/command/command.interface';
+import { PathfindingService, SkillService } from '../../../system';
+import { TargetType } from '../../../model/skill.model';
 import { Unit } from '../../../model/unit.model';
 import { UnitRendererManager } from '../../managers/rendering/unit-renderer.manager';
 import { AnimationManager } from '../../managers/animation.manager';
 import { InputManager } from '../../managers/input.manager';
-import { GAME_CONFIG } from '../../../config/game/game.config';
-import { SkillService } from '../../../skill/skill.service';
 import { TerrainRendererManager } from '../../managers/rendering/terrain-renderer.manager';
-import { TargetType } from '../../../model/skill.model';
 
 /**
  * 場景輸入處理器
@@ -35,8 +34,8 @@ export class SceneInputHandler {
 
   constructor(
     private scene: Phaser.Scene,
-    private gameService: GameStateService,
-    private eventService: GameEventService,
+    private gameStateService: GameStateService,
+    private gameEventService: GameEventService,
     private pathfindingService: PathfindingService,
     private skillService: SkillService,
     private unitRenderer: UnitRendererManager,
@@ -68,46 +67,48 @@ export class SceneInputHandler {
    * 訂閱玩家動作事件（模式切換）
    */
   private subscribeToPlayerActions(): void {
-    this.eventSubscription = this.eventService.events$.subscribe((event) => {
-      switch (event.type) {
-        case GameEventType.PLAYER_ACTION_MOVED:
-          this.currentMode = 'move';
-          this.showMovableArea(event.data.unitId);
-          this.clearAttackableArea();
-          this.clearSkillRange();
-          break;
+    this.eventSubscription = this.gameEventService.events$.subscribe(
+      (event) => {
+        switch (event.type) {
+          case GameEventType.PLAYER_ACTION_MOVED:
+            this.currentMode = 'move';
+            this.showMovableArea(event.data.unitId);
+            this.clearAttackableArea();
+            this.clearSkillRange();
+            break;
 
-        case GameEventType.PLAYER_ACTION_ATTACKED:
-          this.currentMode = 'attack';
-          this.showAttackableArea(event.data.unitId);
-          this.clearMovableArea();
-          this.clearSkillRange();
-          break;
+          case GameEventType.PLAYER_ACTION_ATTACKED:
+            this.currentMode = 'attack';
+            this.showAttackableArea(event.data.unitId);
+            this.clearMovableArea();
+            this.clearSkillRange();
+            break;
 
-        case GameEventType.SKILL_TARGET_SELECT:
-          this.currentMode = 'skill';
-          this.selectedSkillId = event.data.skillId;
-          this.showSkillRange(event.data.unitId, event.data.skillId);
-          this.clearMovableArea();
-          this.clearAttackableArea();
-          break;
+          case GameEventType.SKILL_TARGET_SELECT:
+            this.currentMode = 'skill';
+            this.selectedSkillId = event.data.skillId;
+            this.showSkillRange(event.data.unitId, event.data.skillId);
+            this.clearMovableArea();
+            this.clearAttackableArea();
+            break;
 
-        case GameEventType.PLAYER_ACTION_WAIT:
-        case GameEventType.PLAYER_ACTION_CANCELLED:
-          this.resetMode();
-          break;
-        case GameEventType.TURN_ENDED:
-          this.resetMode();
-          break;
+          case GameEventType.PLAYER_ACTION_WAIT:
+          case GameEventType.PLAYER_ACTION_CANCELLED:
+            this.resetMode();
+            break;
+          case GameEventType.TURN_ENDED:
+            this.resetMode();
+            break;
+        }
       }
-    });
+    );
   }
   /**
    * 處理點擊
    */
   private handleClick(x: number, y: number) {
-    const currentPlayerId = this.gameService.currentPlayerId;
-    const clickedUnit = this.gameService.getUnitAt(x, y);
+    const currentPlayerId = this.gameStateService.currentPlayerId;
+    const clickedUnit = this.gameStateService.getUnitAt(x, y);
 
     if (this.currentMode === 'idle') {
       this.handleIdleClick(x, y, clickedUnit, currentPlayerId);
@@ -131,7 +132,7 @@ export class SceneInputHandler {
   ): void {
     if (clickedUnit) {
       // 發送選擇事件（顯示資訊面板）
-      this.eventService.emit({
+      this.gameEventService.emit({
         type: GameEventType.UNIT_SELECTED,
         data: { x, y },
       });
@@ -168,7 +169,9 @@ export class SceneInputHandler {
       console.log('該位置有單位:', clickedUnit.name);
       return;
     }
-    const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
+    const selectedUnit = this.gameStateService.getUnitById(
+      this.selectedUnitId
+    )!;
     this.executeMove(selectedUnit, x, y);
   }
 
@@ -190,7 +193,9 @@ export class SceneInputHandler {
       return;
     }
 
-    const selectedUnit = this.gameService.getUnitById(this.selectedUnitId)!;
+    const selectedUnit = this.gameStateService.getUnitById(
+      this.selectedUnitId
+    )!;
     this.executeAttack(selectedUnit, clickedUnit);
   }
 
@@ -205,7 +210,7 @@ export class SceneInputHandler {
   ): void {
     if (!this.selectedUnitId || !this.selectedSkillId) return;
 
-    const caster = this.gameService.getUnitById(this.selectedUnitId);
+    const caster = this.gameStateService.getUnitById(this.selectedUnitId);
     if (!caster) return;
 
     const skill = caster.skills.find(
@@ -241,7 +246,7 @@ export class SceneInputHandler {
       targetType === TargetType.ENEMY_ALL
     ) {
       // 範圍技能，不需要具體目標
-      const allUnits = this.gameService.getUnits();
+      const allUnits = this.gameStateService.getUnits();
       if (targetType === TargetType.ALLY_ALL) {
         targets = allUnits.filter(
           (u) => u.ownerId === currentPlayerId && u.alive
@@ -268,7 +273,7 @@ export class SceneInputHandler {
     targetY: number
   ): void {
     const path = this.pathfindingService.findPath(
-      this.gameService.getGameState(),
+      this.gameStateService.getGameState(),
       { x: selectedUnit.x, y: selectedUnit.y },
       { x: targetX, y: targetY },
       selectedUnit.id
@@ -281,14 +286,14 @@ export class SceneInputHandler {
     const cmd: GameCommand = {
       id: 'cmd_' + Date.now(),
       type: 'MOVE',
-      playerId: this.gameService.currentPlayerId,
+      playerId: this.gameStateService.currentPlayerId,
       unitId: this.selectedUnitId!,
       from: { x: selectedUnit.x, y: selectedUnit.y },
       to: { x: targetX, y: targetY },
       timestamp: Date.now(),
     };
 
-    const result = this.gameService.execute(cmd);
+    const result = this.gameStateService.execute(cmd);
     if (result.success) {
       this.clearAllAreas();
 
@@ -311,7 +316,7 @@ export class SceneInputHandler {
     const cmd: GameCommand = {
       id: 'cmd_' + Date.now(),
       type: 'ATTACK',
-      playerId: this.gameService.currentPlayerId,
+      playerId: this.gameStateService.currentPlayerId,
       unitId: attacker.id,
       targetId: defender.id,
       from: { x: attacker.x, y: attacker.y },
@@ -319,7 +324,7 @@ export class SceneInputHandler {
       timestamp: Date.now(),
     };
 
-    const result = this.gameService.execute(cmd);
+    const result = this.gameStateService.execute(cmd);
     if (result.success) {
       this.clearAllAreas();
 
@@ -358,13 +363,13 @@ export class SceneInputHandler {
     const cmd: GameCommand = {
       id: 'cmd_' + Date.now(),
       type: 'SKILL',
-      playerId: this.gameService.currentPlayerId,
+      playerId: this.gameStateService.currentPlayerId,
       unitId: caster.id,
       skillId: skillId,
       targetPosition: { x: targetPosition.x, y: targetPosition.y },
     };
 
-    const result = this.gameService.execute(cmd);
+    const result = this.gameStateService.execute(cmd);
 
     if (result.success) {
       console.log(`${caster.name} 使用了技能`);
@@ -383,7 +388,7 @@ export class SceneInputHandler {
 
     // 取的可移動範圍
     const movableArea = this.pathfindingService.getMovableArea(
-      this.gameService.getGameState(),
+      this.gameStateService.getGameState(),
       unitId
     );
 
@@ -411,7 +416,7 @@ export class SceneInputHandler {
 
     // 取的可攻擊範圍
     const attackableArea = this.pathfindingService.getAttackableArea(
-      this.gameService.getGameState(),
+      this.gameStateService.getGameState(),
       unitId
     );
     // 繪製可攻擊範圍
@@ -436,7 +441,7 @@ export class SceneInputHandler {
   private showSkillRange(unitId: string, skillId: string): void {
     this.clearSkillRange();
 
-    const unit = this.gameService.getUnitById(unitId);
+    const unit = this.gameStateService.getUnitById(unitId);
     if (!unit) return;
 
     const skill = unit.skills.find((s) => s.id === skillId);
@@ -447,7 +452,7 @@ export class SceneInputHandler {
 
     // 計算範圍內的所有格子
     const rangeArea: { x: number; y: number }[] = [];
-    const gameState = this.gameService.getGameState();
+    const gameState = this.gameStateService.getGameState();
 
     for (let dy = -range; dy <= range; dy++) {
       for (let dx = -range; dx <= range; dx++) {
@@ -479,7 +484,7 @@ export class SceneInputHandler {
    * 顯示單位提示文字
    */
   private showUnitTooltip(x: number, y: number) {
-    const unit = this.gameService.getUnitAt(x, y);
+    const unit = this.gameStateService.getUnitAt(x, y);
     if (unit) {
       if (!this.unitTooltip) {
         this.unitTooltip = this.scene.add.text(0, 0, '', {
@@ -532,13 +537,13 @@ export class SceneInputHandler {
    */
   private showTerrainTooltip(x: number, y: number) {
     // 如果該位置有單位，不顯示地形資訊
-    const unit = this.gameService.getUnitAt(x, y);
+    const unit = this.gameStateService.getUnitAt(x, y);
     if (unit) {
       this.terrainTooltip?.setVisible(false);
       return;
     }
 
-    const gameState = this.gameService.getGameState();
+    const gameState = this.gameStateService.getGameState();
     const tile = gameState.tiles.find((tile) => tile.x === x && tile.y === y);
     if (tile) {
       if (!this.terrainTooltip) {

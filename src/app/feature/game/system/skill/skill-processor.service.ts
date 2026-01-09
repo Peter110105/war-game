@@ -1,10 +1,16 @@
 import { Injectable } from '@angular/core';
-import { GameEventService, GameEventType } from '../state/game-event.service';
+import {
+  GameEventService,
+  GameEventType,
+} from '../../core/state/game-event.service';
 import { SkillService } from './skill.service';
-import { GameState } from '../model/game-state.model';
-import { GameCommand, SkillCommand } from '../command/command.interface';
-import { Skill, TargetType } from '../model/skill.model';
-import { Unit } from '../model/unit.model';
+import { GameState } from '../../model/game-state.model';
+import {
+  GameCommand,
+  SkillCommand,
+} from '../../core/command/command.interface';
+import { Skill, TargetType } from '../../model/skill.model';
+import { Unit } from '../../model/unit.model';
 
 export interface SkillExecutionResult {
   success: boolean;
@@ -17,9 +23,9 @@ export interface SkillExecutionResult {
 @Injectable({
   providedIn: 'root',
 })
-export class SkillProcessor {
+export class SkillProcessorService {
   constructor(
-    private eventService: GameEventService,
+    private gameEventService: GameEventService,
     private skillService: SkillService
   ) {}
 
@@ -71,7 +77,7 @@ export class SkillProcessor {
     caster.actionState.canAttacked = false;
 
     // 8. 發送技能使用事件
-    this.eventService.emit({
+    this.gameEventService.emit({
       type: GameEventType.SKILL_ACTIVATED,
       data: {
         unitId: caster.id,

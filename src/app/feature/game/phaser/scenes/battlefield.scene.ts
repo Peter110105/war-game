@@ -1,19 +1,18 @@
 import Phaser from 'phaser';
-import { GameStateService } from '../../state/game-state.service';
-import { GameEventService } from '../../state/game-event.service';
-import { PathfindingService } from '../../movement/path-finding.service';
 import { GAME_CONFIG } from '../../config/game/game.config';
+import { GameStateService } from '../../core/state/game-state.service';
+import { GameEventService } from '../../core/state/game-event.service';
 import { UnitRendererManager } from '../managers/rendering/unit-renderer.manager';
 import { AnimationManager } from '../managers/animation.manager';
 import { InputManager } from '../managers/input.manager';
 import { HpBarManager } from '../managers/rendering/hp-bar.manager';
 import { TerrainRendererManager } from '../managers/rendering/terrain-renderer.manager';
-import { SkillService } from '../../skill/skill.service';
 import { EffectRendererManager } from '../managers/rendering/effect-renderer.manager';
 import { SceneEventHandler } from './handlers/scene-event.handler';
 import { SceneInputHandler } from './handlers/scene-input.handler';
 import { SceneVisualHandler } from './handlers/scene-visual.handler';
-
+import { PathfindingService, SkillService } from '../../system';
+import {} from '../../system/skill/skill.service';
 /**
  * 戰場場景 (簡化後的協調者)
  * 職責：
@@ -23,8 +22,8 @@ import { SceneVisualHandler } from './handlers/scene-visual.handler';
  */
 export class BattlefieldScene extends Phaser.Scene {
   // service
-  private gameService!: GameStateService;
-  private eventService!: GameEventService;
+  private gameStateService!: GameStateService;
+  private gameEventService!: GameEventService;
   private pathfindingService!: PathfindingService;
   private skillService!: SkillService;
 
@@ -50,13 +49,13 @@ export class BattlefieldScene extends Phaser.Scene {
    */
 
   init(data: {
-    gameService: GameStateService;
-    eventService: GameEventService;
+    gameStateService: GameStateService;
+    gameEventService: GameEventService;
     pathfindingService: PathfindingService;
     skillService: SkillService;
   }) {
-    this.gameService = data.gameService;
-    this.eventService = data.eventService;
+    this.gameStateService = data.gameStateService;
+    this.gameEventService = data.gameEventService;
     this.pathfindingService = data.pathfindingService;
     this.skillService = data.skillService;
   }
@@ -90,8 +89,8 @@ export class BattlefieldScene extends Phaser.Scene {
     // 事件處理器
     this.eventHandler = new SceneEventHandler(
       this,
-      this.eventService,
-      this.gameService,
+      this.gameEventService,
+      this.gameStateService,
       this.unitRenderer,
       this.hpBarMgr,
       this.effectRenderer
@@ -100,8 +99,8 @@ export class BattlefieldScene extends Phaser.Scene {
     // 輸入處理器
     this.inputHandler = new SceneInputHandler(
       this,
-      this.gameService,
-      this.eventService,
+      this.gameStateService,
+      this.gameEventService,
       this.pathfindingService,
       this.skillService,
       this.unitRenderer,
@@ -111,7 +110,7 @@ export class BattlefieldScene extends Phaser.Scene {
     );
 
     // 視覺效果處理器
-    this.visualHandler = new SceneVisualHandler(this, this.gameService);
+    this.visualHandler = new SceneVisualHandler(this, this.gameStateService);
   }
 
   /**
@@ -156,7 +155,7 @@ export class BattlefieldScene extends Phaser.Scene {
    * 繪製地形
    */
   private drawTerrain() {
-    const gameState = this.gameService.getGameState();
+    const gameState = this.gameStateService.getGameState();
     this.terrainRenderer.drawTerrain(gameState);
   }
 
@@ -164,7 +163,7 @@ export class BattlefieldScene extends Phaser.Scene {
    * 繪製單位和血條
    */
   private drawUnitsWithHpBars() {
-    const gameState = this.gameService.getGameState();
+    const gameState = this.gameStateService.getGameState();
     this.unitRenderer.drawUnits(gameState);
 
     // 為每個單位創建血條

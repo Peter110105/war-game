@@ -1,8 +1,7 @@
-// src/app/feature/game/phaser/manager/effect-renderer.manager.ts
 import Phaser from 'phaser';
+import { GAME_CONFIG } from '../../../config/game/game.config';
 import { Unit } from '../../../model/unit.model';
 import { SkillEffectType } from '../../../model/skill.model';
-import { GAME_CONFIG } from '../../../config/game/game.config';
 
 interface EffectIcon {
   container: Phaser.GameObjects.Container;

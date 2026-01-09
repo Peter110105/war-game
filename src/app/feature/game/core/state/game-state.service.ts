@@ -1,29 +1,31 @@
 import { Injectable } from '@angular/core';
-import { GameStateLoaderService } from '../../../core/service/game-state-loader.service';
+import { GameStateLoaderService } from '../../../../core/service/game-state-loader.service';
+import { GameStateFactory } from '../../factory/game-state.factory';
 import { GameEventService, GameEventType } from './game-event.service';
-import { GameState } from '../model/game-state.model';
 import { GameCommand } from '../command/command.interface';
-import { MovementProcessor } from '../movement/movement-processor';
-import { CombatProcessor } from '../combat/combat-processor';
-import { Unit } from '../model/unit.model';
-import { Player } from '../model/player.model';
-import { GameStateFactory } from '../factory/game-state.factory';
-import { SkillEffectType } from '../model/skill.model';
-import { SkillService } from '../skill/skill.service';
-import { SkillProcessor } from '../skill/skill-processor';
+import { GameState } from '../../model/game-state.model';
+import { Unit } from '../../model/unit.model';
+import { Player } from '../../model/player.model';
+import { SkillEffectType } from '../../model/skill.model';
+import {
+  CombatProcessorService,
+  MovementProcessorService,
+  SkillProcessorService,
+  SkillService,
+} from '../../system';
 
 @Injectable({ providedIn: 'root' })
 export class GameStateService {
   private state!: GameState;
 
   constructor(
-    private eventService: GameEventService,
-    private movementProcessor: MovementProcessor,
-    private combatProcessor: CombatProcessor,
-    private skillProcessor: SkillProcessor,
+    private movementProcessor: MovementProcessorService,
+    private combatProcessor: CombatProcessorService,
+    private skillProcessor: SkillProcessorService,
     private gameStateLoaderService: GameStateLoaderService,
-    private gameStateFactory: GameStateFactory,
-    private skillService: SkillService
+    private gameEventService: GameEventService,
+    private skillService: SkillService,
+    private gameStateFactory: GameStateFactory
   ) {
     // this.state = this.gameStateFactory.createDefaultGame();
 
@@ -144,7 +146,7 @@ export class GameStateService {
 
         // 檢查單位是否因持續傷害死亡
         if (!u.alive) {
-          this.eventService.emit({
+          this.gameEventService.emit({
             type: GameEventType.UNIT_DIED,
             data: {
               unitId: u.id,
@@ -155,7 +157,7 @@ export class GameStateService {
       });
 
     // 5. 發出回合結束事件
-    this.eventService.emit({
+    this.gameEventService.emit({
       type: GameEventType.TURN_ENDED,
       data: {
         turn: this.state.turn,

@@ -1,12 +1,15 @@
 // src/app/feature/game/service/unit-level.service.ts
 import { Injectable } from '@angular/core';
-import { Unit } from '../model/unit.model';
-import { EXP_CONFIG, getExpToNextLevel } from '../config/unit';
-import { GameEventService, GameEventType } from '../state/game-event.service';
+import { Unit } from '../../model/unit.model';
+import { EXP_CONFIG, getExpToNextLevel } from '../../config/unit';
+import {
+  GameEventService,
+  GameEventType,
+} from '../../core/state/game-event.service';
 
 @Injectable({ providedIn: 'root' })
 export class UnitLevelService {
-  constructor(private eventService: GameEventService) {}
+  constructor(private gameEventService: GameEventService) {}
 
   /**
    * 增加經驗值
@@ -45,7 +48,7 @@ export class UnitLevelService {
     this.growStats(unit);
 
     // 發送升級事件
-    this.eventService.emit({
+    this.gameEventService.emit({
       type: GameEventType.UNIT_LEVEL_UP,
       data: {
         unitId: unit.id,

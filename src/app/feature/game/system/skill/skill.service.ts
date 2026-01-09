@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { GameEventService, GameEventType } from '../state/game-event.service';
+import {
+  GameEventService,
+  GameEventType,
+} from '../../core/state/game-event.service';
 import {
   Skill,
   SkillEffect,
@@ -7,12 +10,12 @@ import {
   SkillType,
   TargetType,
   TriggerTiming,
-} from '../model/skill.model';
-import { ActiveEffect, Unit } from '../model/unit.model';
+} from '../../model/skill.model';
+import { ActiveEffect, Unit } from '../../model/unit.model';
 
 @Injectable({ providedIn: 'root' })
 export class SkillService {
-  constructor(private eventService: GameEventService) {}
+  constructor(private gameEventService: GameEventService) {}
 
   /**
    * 獲取被動技能的總效果值（支持多效果）
@@ -111,7 +114,7 @@ export class SkillService {
     });
 
     // 發送技能使用事件
-    // this.eventService.emit({
+    // this.gameEventService.emit({
     //   type: GameEventType.SKILL_USED,
     //   data: {
     //     unitId: caster.id,
@@ -197,7 +200,7 @@ export class SkillService {
     const actualHeal = Math.min(amount, target.stats.maxHp - target.stats.hp);
     target.stats.hp += actualHeal;
 
-    this.eventService.emit({
+    this.gameEventService.emit({
       type: GameEventType.UNIT_HEALED,
       data: {
         targetId: target.id,

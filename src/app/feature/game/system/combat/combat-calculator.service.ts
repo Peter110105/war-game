@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { SkillService } from '../skill/skill.service';
-import { Unit } from '../model/unit.model';
-import { SkillEffectType } from '../model/skill.model';
+import { Unit } from '../../model/unit.model';
+import { SkillEffectType } from '../../model/skill.model';
 
 @Injectable({ providedIn: 'root' })
-export class CombatCalculator {
+export class CombatCalculatorService {
   constructor(private skillService: SkillService) {}
 
   /**

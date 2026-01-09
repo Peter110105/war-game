@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GameState } from '../model/game-state.model';
+import { GameState } from '../../model/game-state.model';
 
 export type VictoryResult = {
   isGameOver: boolean;
