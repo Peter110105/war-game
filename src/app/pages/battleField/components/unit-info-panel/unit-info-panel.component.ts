@@ -64,25 +64,21 @@ export class UnitInfoPanelComponent {
   get actionStatusText(): string {
     if (!this.unit) return '';
 
-    if (this.unit.actionState.isStunned) return '暈眩';
+    const { canMoved, canAttacked } = this.unit.actionState;
 
-    const { hasMoved, hasAttacked } = this.unit.actionState;
-
-    if (hasMoved && hasAttacked) return '行動完畢';
-    if (hasMoved) return '已移動';
-    if (hasAttacked) return '已攻擊';
+    if (!canMoved && !canAttacked) return '行動完畢';
+    if (!canMoved) return '已移動';
+    if (!canAttacked) return '已攻擊';
     return '可行動';
   }
 
   get actionStatusColor(): string {
     if (!this.unit) return '#999';
 
-    if (this.unit.actionState.isStunned) return '#8b00ff';
+    const { canMoved, canAttacked } = this.unit.actionState;
 
-    const { hasMoved, hasAttacked } = this.unit.actionState;
-
-    if (hasMoved && hasAttacked) return '#999';
-    if (hasMoved || hasAttacked) return '#ffaa00';
+    if (!canMoved && !canAttacked) return '#999';
+    if (!canMoved || !canAttacked) return '#ffaa00';
     return '#00ff00';
   }
 

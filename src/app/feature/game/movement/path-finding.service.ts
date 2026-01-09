@@ -39,10 +39,9 @@ export class PathfindingService {
 
     // 檢查特殊移動能力
     const canFly =
-      unit.characteristics?.canFly ||
+      unit.movementType === 'FLY' ||
       this.skillService.hasEffect(unit, SkillEffectType.FLY);
     const ignoresTerrain =
-      unit.characteristics?.ignoresTerrain ||
       this.skillService.hasEffect(unit, SkillEffectType.IGNORE_TERRAIN) ||
       this.skillService.hasEffect(unit, SkillEffectType.TERRAIN_MASTER);
 
@@ -138,10 +137,9 @@ export class PathfindingService {
     maxMove = Math.max(0, maxMove);
     // 檢查特殊能力
     const canFly =
-      unit.characteristics?.canFly ||
+      unit.movementType === 'FLY' ||
       this.skillService.hasEffect(unit, SkillEffectType.FLY);
     const ignoresTerrain =
-      unit.characteristics?.ignoresTerrain ||
       this.skillService.hasEffect(unit, SkillEffectType.IGNORE_TERRAIN) ||
       this.skillService.hasEffect(unit, SkillEffectType.TERRAIN_MASTER);
 
@@ -309,7 +307,6 @@ export class PathfindingService {
         queue.push({ x: nx, y: ny, dist: current.dist + 1 });
       }
     }
-
     return result;
   }
 }

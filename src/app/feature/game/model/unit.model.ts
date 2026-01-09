@@ -14,6 +14,15 @@ export enum UnitType {
 }
 
 /**
+ * 移動方式
+ */
+export enum movementType {
+  WALK = 'WALK',
+  RIDE = 'RIDE',
+  FLY = 'FLY',
+  SHIP = 'SHIP',
+}
+/**
  * 單位經驗和等級
  */
 export interface UnitLevel {
@@ -30,7 +39,7 @@ export interface GrowthRates {
   hp: number; // HP 成長
   attack: number; // 攻擊力成長
   defense: number; // 防禦力成長
-  // mana: number; // 魔力成長
+  mana: number; // 魔力成長
 }
 
 /**
@@ -88,18 +97,12 @@ export interface Unit {
   alive: boolean;
 
   actionState: {
-    hasMoved: boolean;
-    hasAttacked: boolean;
+    canMoved: boolean;
+    canAttacked: boolean;
     canAct: boolean;
-    /** 是否被暈眩 */
-    isStunned?: boolean;
   };
-  /** 單位特性*/
-  characteristics?: {
-    canFly?: boolean;
-    ignoresTerrain?: boolean;
-    canHeal?: boolean;
-  };
+  /** 單位移動方式*/
+  movementType: movementType;
 }
 
 /**
@@ -111,9 +114,5 @@ export interface UnitConfig {
   baseStats: UnitStats;
   growthRates: GrowthRates;
   skills: Skill[];
-  characteristics?: {
-    canFly?: boolean;
-    ignoresTerrain?: boolean;
-    canHeal?: boolean;
-  };
+  movementType: movementType;
 }

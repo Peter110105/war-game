@@ -47,12 +47,8 @@ export class CombatProcessor {
     // 3.1 檢查是否存在
     if (!attacker)
       return { success: false, message: 'attacker unit not found' };
-    // 3.2 檢查是否被暈眩 // FIXME
-    if (attacker.actionState.isStunned) {
-      return { success: false, message: 'attacker is stunned' };
-    }
     // 3.2 檢查是否已攻擊或無法行動
-    if (attacker.actionState.hasAttacked || !attacker.actionState.canAct)
+    if (!attacker.actionState.canAttacked || !attacker.actionState.canAct)
       return {
         success: false,
         message: 'attacker unit already attacked this turn',
@@ -78,7 +74,7 @@ export class CombatProcessor {
     const result = this.executeCombat(state, attacker, defender);
 
     // 發送攻擊事件 (用於更新血條)
-    attacker.actionState.hasAttacked = true;
+    attacker.actionState.canAttacked = false;
     this.eventService.emit({
       type: GameEventType.UNIT_ATTACKED,
       data: {

@@ -36,7 +36,7 @@ export class SkillProcessor {
     if (caster.ownerId !== cmd.playerId) {
       return { success: false, message: 'not your unit' };
     }
-    if (caster.actionState.hasAttacked || !caster.actionState.canAct) {
+    if (!caster.actionState.canAttacked || !caster.actionState.canAct) {
       return {
         success: false,
         message: 'caster unit already attacked this turn',
@@ -68,7 +68,7 @@ export class SkillProcessor {
     }
 
     // 7. 標記單位已使用技能
-    caster.actionState.hasAttacked = true;
+    caster.actionState.canAttacked = false;
 
     // 8. 發送技能使用事件
     this.eventService.emit({

@@ -147,8 +147,8 @@ export class BattlefieldComponent implements OnInit, OnDestroy {
       case 'wait':
         // 待機 (標記單位已完成行動)
         if (this.selectedUnit) {
-          this.selectedUnit.actionState.hasMoved = true;
-          this.selectedUnit.actionState.hasAttacked = true;
+          this.selectedUnit.actionState.canMoved = true;
+          this.selectedUnit.actionState.canAttacked = true;
           this.selectedUnit.actionState.canAct = false;
         }
 

@@ -1,4 +1,4 @@
-import { UnitConfig, UnitType } from '../../model/unit.model';
+import { movementType, UnitConfig, UnitType } from '../../model/unit.model';
 import { getSkillsByIds } from '../skill/skill-registry';
 
 /**
@@ -20,8 +20,10 @@ export const UNIT_BASE_CONFIGS: Record<string, UnitConfig> = {
       hp: 5,
       attack: 3,
       defense: 2,
+      mana: 1,
     },
     skills: getSkillsByIds(['critical_strike', 'power_strike']),
+    movementType: movementType.WALK,
   },
 
   [UnitType.ARCHER]: {
@@ -39,8 +41,10 @@ export const UNIT_BASE_CONFIGS: Record<string, UnitConfig> = {
       hp: 3,
       attack: 4,
       defense: 1,
+      mana: 1,
     },
     skills: getSkillsByIds(['critical_strike', 'swift']),
+    movementType: movementType.WALK,
   },
 
   [UnitType.KNIGHT]: {
@@ -58,8 +62,10 @@ export const UNIT_BASE_CONFIGS: Record<string, UnitConfig> = {
       hp: 6,
       attack: 3,
       defense: 3,
+      mana: 1,
     },
     skills: getSkillsByIds(['iron_wall', 'counter', 'shield_bash']),
+    movementType: movementType.WALK,
   },
 
   [UnitType.CAVALRY]: {
@@ -77,11 +83,10 @@ export const UNIT_BASE_CONFIGS: Record<string, UnitConfig> = {
       hp: 5,
       attack: 4,
       defense: 1,
+      mana: 1,
     },
     skills: getSkillsByIds(['swift', 'berserker']),
-    characteristics: {
-      ignoresTerrain: true,
-    },
+    movementType: movementType.RIDE,
   },
 
   [UnitType.MAGE]: {
@@ -101,8 +106,10 @@ export const UNIT_BASE_CONFIGS: Record<string, UnitConfig> = {
       hp: 2,
       attack: 5,
       defense: 1,
+      mana: 1,
     },
     skills: getSkillsByIds(['chain_lightning', 'fire_storm']),
+    movementType: movementType.WALK,
   },
 
   [UnitType.FLYER]: {
@@ -120,11 +127,10 @@ export const UNIT_BASE_CONFIGS: Record<string, UnitConfig> = {
       hp: 4,
       attack: 3,
       defense: 1,
+      mana: 1,
     },
     skills: getSkillsByIds(['terrain_adapt']),
-    characteristics: {
-      canFly: true,
-    },
+    movementType: movementType.FLY,
   },
 
   [UnitType.HEALER]: {
@@ -144,11 +150,10 @@ export const UNIT_BASE_CONFIGS: Record<string, UnitConfig> = {
       hp: 3,
       attack: 1,
       defense: 2,
+      mana: 1,
     },
     skills: getSkillsByIds(['heal', 'group_heal', 'regeneration']),
-    characteristics: {
-      canHeal: true,
-    },
+    movementType: movementType.WALK,
   },
 };
 

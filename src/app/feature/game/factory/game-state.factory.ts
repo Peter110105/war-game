@@ -67,16 +67,14 @@ export class GameStateFactory {
       },
       growthRates: { ...config.growthRates },
       skills,
+      activeEffects: [],
       alive: true,
       actionState: {
-        hasMoved: false,
-        hasAttacked: false,
+        canMoved: true,
+        canAttacked: true,
         canAct: true,
       },
-      characteristics: config.characteristics
-        ? { ...config.characteristics }
-        : undefined,
-      activeEffects: [],
+      movementType: config.movementType,
     };
 
     // 如果不是 1 級，應用成長

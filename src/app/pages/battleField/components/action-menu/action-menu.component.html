@@ -7,8 +7,8 @@
   <div class="menu-header">
     <span class="unit-name">{{ selectedUnit.name }}</span>
     <span class="unit-status">
-      {{ selectedUnit.actionState.hasMoved ? "已移動" : "" }}
-      {{ selectedUnit.actionState.hasAttacked ? "已攻擊" : "" }}
+      {{ selectedUnit.actionState.canMoved ? "" : "已移動" }}
+      {{ selectedUnit.actionState.canAttacked ? "" : "已攻擊" }}
     </span>
   </div>
 

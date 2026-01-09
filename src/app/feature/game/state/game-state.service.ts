@@ -125,10 +125,9 @@ export class GameStateService {
       .forEach((u) => {
         // 重置行動狀態
         u.actionState = {
-          hasMoved: false,
-          hasAttacked: false,
+          canMoved: true,
+          canAttacked: true,
           canAct: true,
-          isStunned: false,
         };
 
         // 檢查是否被暈眩
@@ -136,7 +135,6 @@ export class GameStateService {
           (e) => e.effectType === SkillEffectType.STUN
         );
         if (isStunned) {
-          u.actionState.isStunned = true;
           u.actionState.canAct = false;
           console.log(`😵 ${u.name} 被暈眩，無法行動！`);
         }
@@ -200,10 +198,9 @@ export class GameStateService {
       .filter((u) => u.ownerId === playerId && u.alive)
       .forEach((u) => {
         u.actionState = {
-          hasMoved: false,
-          hasAttacked: false,
+          canMoved: true,
+          canAttacked: true,
           canAct: true,
-          isStunned: false,
         };
       });
   }
@@ -214,7 +211,7 @@ export class GameStateService {
   public setUnitMoved(unitId: string) {
     const unit = this.state.units.find((u) => u.id === unitId);
     if (unit) {
-      unit.actionState.hasMoved = true;
+      unit.actionState.canMoved = false;
     }
   }
 
@@ -235,11 +232,7 @@ export class GameStateService {
     const unit = this.state.units.find((u) => u.id === unitId);
     if (!unit) return false;
 
-    // 檢查是否被暈眩或減速
-    const isStunned = unit.actionState.isStunned;
-    if (isStunned) return false;
-
-    return unit.actionState.canAct && !unit.actionState.hasMoved;
+    return unit.actionState.canAct && unit.actionState.canMoved;
   }
 
   /**
@@ -276,7 +269,7 @@ export class GameStateService {
     if (!unit) return false;
 
     return (
-      unit.characteristics?.canFly ||
+      unit.movementType === 'FLY' ||
       this.skillService.hasEffect(unit, SkillEffectType.FLY)
     );
   }
@@ -289,7 +282,6 @@ export class GameStateService {
     if (!unit) return false;
 
     return (
-      unit.characteristics?.ignoresTerrain ||
       this.skillService.hasEffect(unit, SkillEffectType.IGNORE_TERRAIN) ||
       this.skillService.hasEffect(unit, SkillEffectType.TERRAIN_MASTER)
     );

@@ -31,7 +31,7 @@ export class MovementProcessor {
     // 3.單位檢查
     const unit = state.units.find((u) => u.id === moveCmd.unitId);
     if (!unit) return { success: false, message: 'unit not found' };
-    if (unit.actionState.hasMoved || !unit.actionState.canAct)
+    if (!unit.actionState.canMoved || !unit.actionState.canAct)
       return { success: false, message: 'unit already moved this turn' };
     if (!unit.alive) return { success: false, message: 'unit dead' };
     if (unit.ownerId !== moveCmd.playerId)
@@ -56,7 +56,7 @@ export class MovementProcessor {
     // 7. 移動並標記單位為已移動
     unit.x = x;
     unit.y = y;
-    unit.actionState.hasMoved = true;
+    unit.actionState.canMoved = false;
 
     // 發送攻擊事件 (用於更新血條)
     this.eventService.emit({

@@ -107,11 +107,9 @@ export class CombatCalculator {
     const distance =
       Math.abs(attacker.x - defender.x) + Math.abs(attacker.y - defender.y);
 
-    // 不能攻擊己方單位（除非有治療技能）
+    // 不能攻擊己方單位
     if (attacker.ownerId === defender.ownerId) {
-      if (!attacker.characteristics?.canHeal) {
-        return false;
-      }
+      return false;
     }
     // 檢查射程（包含射程加成）
     const rangeBoost = this.skillService.getPassiveEffect(
@@ -130,33 +128,33 @@ export class CombatCalculator {
    * @param target 目標
    * @returns 是否能治療
    */
-  public canHeal(healer: Unit, target: Unit): boolean {
-    if (!healer.characteristics?.canHeal) {
-      return false;
-    }
+  // public canHeal(healer: Unit, target: Unit): boolean {
+  //   if (!healer.characteristics?.canHeal) {
+  //     return false;
+  //   }
 
-    // 必須是友軍
-    if (healer.ownerId !== target.ownerId) {
-      return false;
-    }
+  //   // 必須是友軍
+  //   if (healer.ownerId !== target.ownerId) {
+  //     return false;
+  //   }
 
-    // 目標必須受傷
-    if (target.stats.hp >= target.stats.maxHp) {
-      return false;
-    }
+  //   // 目標必須受傷
+  //   if (target.stats.hp >= target.stats.maxHp) {
+  //     return false;
+  //   }
 
-    const distance =
-      Math.abs(healer.x - target.x) + Math.abs(healer.y - target.y);
+  //   const distance =
+  //     Math.abs(healer.x - target.x) + Math.abs(healer.y - target.y);
 
-    // 檢查射程（包含射程加成）
-    const rangeBoost = this.skillService.getPassiveEffect(
-      healer,
-      SkillEffectType.RANGE_BOOST
-    );
-    const effectiveRange = healer.stats.range + Math.floor(rangeBoost);
+  //   // 檢查射程（包含射程加成）
+  //   const rangeBoost = this.skillService.getPassiveEffect(
+  //     healer,
+  //     SkillEffectType.RANGE_BOOST
+  //   );
+  //   const effectiveRange = healer.stats.range + Math.floor(rangeBoost);
 
-    return distance <= effectiveRange;
-  }
+  //   return distance <= effectiveRange;
+  // }
 
   /**
    * 檢查是否會觸發反擊

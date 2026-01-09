@@ -139,14 +139,10 @@ export class SceneInputHandler {
       // 只有我方單位才能操控
       if (clickedUnit.ownerId === currentPlayerId) {
         if (
-          clickedUnit.actionState.hasMoved &&
-          clickedUnit.actionState.hasAttacked
+          !clickedUnit.actionState.canMoved &&
+          !clickedUnit.actionState.canAttacked
         ) {
           console.log('該單位本回合已行動過');
-          return;
-        }
-        if (clickedUnit.actionState.isStunned) {
-          console.log('該單位被暈眩，無法行動');
           return;
         }
         this.selectedUnitId = clickedUnit.id;

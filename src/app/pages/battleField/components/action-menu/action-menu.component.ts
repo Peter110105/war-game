@@ -23,7 +23,7 @@ export class ActionMenuComponent {
   get canMove(): boolean {
     return (
       (this.selectedUnit?.actionState.canAct &&
-        !this.selectedUnit?.actionState.hasMoved) ||
+        this.selectedUnit?.actionState.canMoved) ||
       false
     );
   }
@@ -33,7 +33,7 @@ export class ActionMenuComponent {
   get canAttack(): boolean {
     return (
       (this.selectedUnit?.actionState.canAct &&
-        !this.selectedUnit?.actionState.hasAttacked) ||
+        this.selectedUnit?.actionState.canAttacked) ||
       false
     );
   }
